@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MITHIL ASTIK // SYSTEM OVERLOAD</title>
+
+    <!-- Google Fonts: Anton (Massive Display) & Space Mono (Utility) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"Space Mono"', 'monospace'],
+                        display: ['"Anton"', 'sans-serif'],
+                    },
+                    colors: {
+                        ink: '#000000',
+                        paper: '#FFFFFF',
+                        acid: '#DFFF00',   /* Acid Neon Green */
+                        magenta: '#FF00FF', /* Hot Pink/Magenta */
+                        cyan: '#00FFFF',    /* Electric Cyan */
+                        alert: '#FF3300',   /* Warning Red */
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            overflow-x: hidden;
+            text-transform: uppercase;
+        }
+
+        /* Brutalist Selection */
+        ::selection {
+            background-color: #FF00FF;
+            color: #FFFFFF;
+        }
+
+        /* Massive Scrollbar */
+        ::-webkit-scrollbar {
+            width: 24px;
+            border-left: 6px solid #000;
+            background: #DFFF00;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #FF00FF;
+            border: 6px solid #000;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00FFFF;
+        }
+
+        /* --- MAXIMALIST BORDERS & SHADOWS --- */
+        .border-heavy {
+            border: 6px solid #000000;
+        }
+
+        .shadow-brutal {
+            box-shadow: 16px 16px 0px #000000;
+            transition: all 0.1s steps(2);
+        }
+
+        .shadow-brutal:hover {
+            box-shadow: 4px 4px 0px #000000;
+            transform: translate(12px, 12px);
+        }
+
+        .shadow-magenta {
+            box-shadow: 16px 16px 0px #FF00FF;
+        }
+
+        .shadow-magenta:hover {
+            box-shadow: 4px 4px 0px #FF00FF;
+            transform: translate(12px, 12px);
+        }
+
+        .shadow-acid {
+            box-shadow: 16px 16px 0px #DFFF00;
+        }
+
+        .shadow-acid:hover {
+            box-shadow: 4px 4px 0px #DFFF00;
+            transform: translate(12px, 12px);
+        }
+
+        /* --- ANIMATIONS --- */
+        .marquee-wrap {
+            overflow: hidden;
+            white-space: nowrap;
+            display: flex;
+            width: 100vw;
+            border-top: 6px solid #000;
+            border-bottom: 6px solid #000;
+        }
+
+        .marquee {
+            display: inline-block;
+            animation: marquee 10s linear infinite;
+            padding-right: 1rem;
+        }
+
+        .marquee-fast {
+            animation: marquee 5s linear infinite;
+        }
+
+        .marquee-reverse {
+            animation: marquee-rev 12s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        @keyframes marquee-rev {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .spin-chaos {
+            animation: spin 8s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .blink {
+            animation: blink 0.5s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .glitch-bg:hover {
+            background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #FFF 25%, #FFF 75%, #000 75%, #000);
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+            color: #DFFF00;
+            text-shadow: 4px 4px 0 #FF00FF;
+        }
+
+        /* --- STARTUP SEQUENCE --- */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background-color: #000;
+            color: #DFFF00;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.4s steps(4);
+        }
+
+        #boot-screen.crash {
+            transform: translateY(-100%);
+        }
+
+        .boot-text {
+            font-size: clamp(4rem, 15vw, 12rem);
+            line-height: 0.8;
+            text-shadow: 10px 10px 0 #FF00FF, -10px -10px 0 #00FFFF;
+        }
+
+        /* Hover Reveal Images for Works */
+        .hover-img {
+            position: absolute;
+            width: 350px;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border: 8px solid #000;
+            box-shadow: 16px 16px 0 #00FFFF;
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            filter: grayscale(100%) contrast(200%);
+        }
+
+        .work-row:hover .hover-img {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) rotate(5deg);
+            filter: grayscale(0%) contrast(120%);
+        }
+
+        /* Chaotic Cursor */
+        body {
+            cursor: crosshair;
+        }
+
+        a,
+        button,
+        input,
+        textarea {
+            cursor: cell;
+        }
+    </style>
+</head>
+
+<body class="font-mono bg-paper text-ink overflow-hidden">
+
+    <!-- STARTUP BOOT SCREEN -->
+    <div id="boot-screen">
+        <div class="font-display boot-text blink" id="boot-counter">00%</div>
+        <div class="mt-8 font-bold text-2xl md:text-4xl bg-magenta text-paper px-4 py-2 border-4 border-acid blink"
+            style="animation-duration: 0.2s">SYSTEM OVERLOAD IN PROGRESS</div>
+
+        <!-- Fake chaotic logs -->
+        <div class="absolute bottom-10 left-10 text-xs text-cyan opacity-80" id="boot-logs">
+            > INITIATING CHAOS_ENGINE.EXE...<br>
+        </div>
+    </div>
+
+    <!-- MAIN WRAPPER -->
+    <div id="main-content" class="min-h-screen flex flex-col relative opacity-0 transition-opacity duration-700">
+
+        <!-- FLOATING BADGES (Maximalist Overlap) -->
+        <div
+            class="fixed top-24 right-10 z-50 w-32 h-32 bg-acid rounded-full border-heavy flex items-center justify-center spin-chaos shadow-magenta pointer-events-none mix-blend-difference hidden md:flex">
+            <span class="font-display text-4xl text-ink text-center leading-none">100%<br>RAW</span>
+        </div>
+        <div
+            class="fixed bottom-10 left-10 z-50 bg-cyan border-heavy px-4 py-2 transform -rotate-12 shadow-brutal pointer-events-none hidden lg:block">
+            <span class="font-display text-3xl text-ink">NO ROUNDED CORNERS</span>
+        </div>
+
+        <!-- HEADER -->
+        <header
+            class="border-heavy border-x-0 border-t-0 bg-paper sticky top-0 z-40 flex flex-col md:flex-row justify-between items-stretch">
+            <div
+                class="p-4 md:p-6 border-b-6 md:border-b-0 md:border-r-[6px] border-ink bg-acid flex-shrink-0 flex items-center justify-center hover:bg-magenta transition-none group">
+                <a href="#hero"
+                    class="font-display text-4xl md:text-5xl lg:text-6xl tracking-tighter leading-none group-hover:text-paper">MITHIL<br>ASTIK.</a>
+            </div>
+
+            <nav class="flex-grow flex flex-col sm:flex-row">
+                <a href="#manifesto"
+                    class="flex-1 border-b-[6px] sm:border-b-0 sm:border-r-[6px] border-ink flex items-center justify-center p-4 font-bold text-xl md:text-2xl hover:bg-ink hover:text-acid transition-none">THEORY</a>
+                <a href="#works"
+                    class="flex-1 border-b-[6px] sm:border-b-0 sm:border-r-[6px] border-ink flex items-center justify-center p-4 font-bold text-xl md:text-2xl hover:bg-ink hover:text-cyan transition-none">ARCHIVE</a>
+                <a href="#arsenal"
+                    class="flex-1 border-b-[6px] sm:border-b-0 sm:border-r-[6px] border-ink flex items-center justify-center p-4 font-bold text-xl md:text-2xl hover:bg-ink hover:text-magenta transition-none">TOOLS</a>
+                <a href="#contact"
+                    class="flex-1 flex items-center justify-center p-4 font-bold text-xl md:text-2xl bg-alert text-paper hover:bg-ink transition-none blink"
+                    style="animation-duration: 1.5s;">HIRE NOW</a>
+            </nav>
+        </header>
+
+        <!-- MULTI-TICKER (Maximalist feature) -->
+        <div class="marquee-wrap bg-ink text-paper text-2xl md:text-4xl font-display py-2">
+            <div class="marquee flex-shrink-0">VISUAL AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// VISUAL
+                AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// </div>
+            <div class="marquee flex-shrink-0">VISUAL AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// VISUAL
+                AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// </div>
+        </div>
+        <div class="marquee-wrap bg-magenta text-ink text-xl md:text-3xl font-display py-1 border-t-0">
+            <div class="marquee marquee-reverse flex-shrink-0">MAXIMUM IMPACT /// DESTROY TO CREATE /// LOUD DESIGN ///
+                MAXIMUM IMPACT /// DESTROY TO CREATE /// LOUD DESIGN ///</div>
+            <div class="marquee marquee-reverse flex-shrink-0">MAXIMUM IMPACT /// DESTROY TO CREATE /// LOUD DESIGN ///
+                MAXIMUM IMPACT /// DESTROY TO CREATE /// LOUD DESIGN ///</div>
+        </div>
+
+        <!-- HERO SECTION -->
+        <section id="hero"
+            class="relative min-h-[80vh] border-heavy border-x-0 border-t-0 bg-cyan flex flex-col justify-center overflow-hidden">
+            <!-- Background massive text -->
+            <div
+                class="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none overflow-hidden">
+                <h1
+                    class="font-display text-[40vw] leading-none text-ink text-center transform rotate-[-5deg] scale-150">
+                    LOUD</h1>
+            </div>
+
+            <div class="relative z-10 px-4 md:px-12 w-full max-w-[1600px] mx-auto">
+                <div
+                    class="bg-paper border-heavy p-6 md:p-12 shadow-brutal inline-block transform rotate-2 hover:rotate-0 transition-transform">
+                    <span class="bg-ink text-acid font-bold px-4 py-2 text-xl inline-block mb-6 shadow-magenta">GRAPHIC
+                        DESIGNER / PROVOCATEUR</span>
+                    <h2 class="font-display text-7xl md:text-8xl lg:text-[10rem] leading-[0.8] tracking-tight uppercase text-ink"
+                        style="-webkit-text-stroke: 4px #000; color: #FFF;">
+                        I DESIGN<br>
+                        <span class="text-magenta" style="-webkit-text-stroke: 0px;">FOR IMPACT.</span><br>
+                        NOT FOR<br>
+                        APPROVAL.
+                    </h2>
+                </div>
+
+                <div
+                    class="mt-12 md:mt-24 max-w-2xl ml-auto bg-acid border-heavy p-6 md:p-8 shadow-brutal transform -rotate-1">
+                    <p class="font-bold text-xl md:text-3xl leading-tight">
+                        Rejecting sterile corporate aesthetics. Engineering raw, unapologetic brand identities,
+                        editorial layouts, and print campaigns that scream.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- THEORY / MANIFESTO -->
+        <section id="manifesto"
+            class="border-heavy border-x-0 border-t-0 bg-ink text-paper py-20 px-4 md:px-12 relative">
+            <div class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0">
+                <div class="lg:col-span-5 relative z-10">
+                    <h2 class="font-display text-7xl md:text-9xl text-acid leading-none mb-6">ANTI<br>BORING.</h2>
+                    <div class="w-full h-6 bg-magenta border-y-4 border-paper mb-8"></div>
+                    <p class="text-2xl font-bold leading-relaxed max-w-lg">
+                        Design is not meant to be invisible. It is meant to grab you by the throat. I leverage clashing
+                        palettes, brutal grids, and massive typography to ensure your message is impossible to ignore.
+                    </p>
+                </div>
+
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-8 relative z-10">
+                    <div
+                        class="bg-paper border-heavy border-paper text-ink p-8 hover:bg-magenta hover:border-magenta hover:text-paper shadow-[12px_12px_0_#DFFF00] transition-none group">
+                        <h3
+                            class="font-display text-5xl mb-4 border-b-6 border-current pb-2 group-hover:pl-4 transition-all">
+                            01. BRANDING</h3>
+                        <p class="font-bold text-lg">Visceral identity systems. Logos that feel like warnings. Branding
+                            that refuses to blend in.</p>
+                    </div>
+                    <div
+                        class="bg-paper border-heavy border-paper text-ink p-8 hover:bg-cyan hover:border-cyan hover:text-ink shadow-[12px_12px_0_#FF00FF] transition-none group mt-0 sm:mt-12">
+                        <h3
+                            class="font-display text-5xl mb-4 border-b-6 border-current pb-2 group-hover:pl-4 transition-all">
+                            02. PRINT</h3>
+                        <p class="font-bold text-lg">Posters, packaging, and editorial layouts that abuse CMYK and
+                            demand physical attention.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Huge background shape -->
+            <div class="absolute right-0 top-0 w-1/2 h-full bg-paper mix-blend-difference pointer-events-none hidden lg:block"
+                style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);"></div>
+        </section>
+
+        <!-- THE ARCHIVE (WORKS) -->
+        <section id="works" class="border-heavy border-x-0 border-t-0 bg-paper py-24 relative z-20">
+            <div class="px-4 md:px-12 mb-16 flex flex-col md:flex-row justify-between md:items-end gap-6">
+                <h2
+                    class="font-display text-8xl md:text-[9rem] leading-none tracking-tighter shadow-[8px_8px_0_#00FFFF] bg-acid inline-block px-4 border-heavy">
+                    THE ARCHIVE</h2>
+                <div class="bg-ink text-paper font-bold px-6 py-4 text-2xl border-heavy">WARNING: HIGH VISUAL DENSITY
+                </div>
+            </div>
+
+            <div class="border-heavy border-x-0 border-b-0 flex flex-col relative" id="works-container">
+                <!-- Data Header -->
+                <div
+                    class="hidden md:flex border-heavy border-x-0 border-t-0 bg-magenta text-ink font-bold text-2xl p-4">
+                    <div class="w-24">ID</div>
+                    <div class="flex-grow">PROJECT NOMENCLATURE</div>
+                    <div class="w-64">DISCIPLINE</div>
+                    <div class="w-32 text-right">YEAR</div>
+                </div>
+
+                <!-- Work 01 -->
+                <a href="#"
+                    class="work-row border-heavy border-x-0 border-t-0 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center bg-paper hover:bg-acid hover:text-ink transition-colors duration-0 relative overflow-hidden group">
+                    <div class="w-24 font-display text-4xl text-alert mb-2 md:mb-0">#01</div>
+                    <div
+                        class="flex-grow font-display text-5xl md:text-7xl group-hover:pl-8 transition-all duration-200 z-10 relative">
+                        <span class="bg-paper group-hover:bg-transparent px-2">ESPORTS CLUB</span>
+                    </div>
+                    <div class="w-64 flex flex-wrap gap-2 mt-4 md:mt-0 z-10 relative">
+                        <span class="border-4 border-ink px-3 py-1 font-bold text-lg bg-cyan">BRAND_ID</span>
+                        <span class="border-4 border-ink px-3 py-1 font-bold text-lg bg-paper">PRINT</span>
+                    </div>
+                    <div class="w-32 md:text-right font-display text-4xl mt-4 md:mt-0 z-10 relative">2026</div>
+
+                    <!-- JS tracked image reveal -->
+                    <img src="https://images.unsplash.com/photo-1600626337651-789f2144bd46?q=80&w=800&auto=format&fit=crop"
+                        alt="Aura" class="hover-img">
+                </a>
+
+                <!-- Work 02 -->
+                <a href="#"
+                    class="work-row border-heavy border-x-0 border-t-0 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center bg-paper hover:bg-cyan hover:text-ink transition-colors duration-0 relative overflow-hidden group">
+                    <div class="w-24 font-display text-4xl text-alert mb-2 md:mb-0">#02</div>
+                    <div
+                        class="flex-grow font-display text-5xl md:text-7xl group-hover:pl-8 transition-all duration-200 z-10 relative">
+                        <span class="bg-paper group-hover:bg-transparent px-2">ATMoS '25</span>
+                    </div>
+                    <div class="w-64 flex flex-wrap gap-2 mt-4 md:mt-0 z-10 relative">
+                        <span
+                            class="border-4 border-ink px-3 py-1 font-bold text-lg bg-magenta text-paper">EDITORIAL</span>
+                    </div>
+                    <div class="w-32 md:text-right font-display text-4xl mt-4 md:mt-0 z-10 relative">2025</div>
+
+                    <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=800&auto=format&fit=crop"
+                        alt="Nexus" class="hover-img">
+                </a>
+
+                <!-- Work 03 -->
+                <a href="#"
+                    class="work-row border-heavy border-x-0 border-t-0 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center bg-paper hover:bg-magenta hover:text-paper transition-colors duration-0 relative overflow-hidden group">
+                    <div class="w-24 font-display text-4xl text-alert mb-2 md:mb-0">#03</div>
+                    <div
+                        class="flex-grow font-display text-5xl md:text-7xl group-hover:pl-8 transition-all duration-200 z-10 relative">
+                        <span class="bg-paper group-hover:bg-transparent group-hover:text-paper px-2">PEARL '26</span>
+                    </div>
+                    <div class="w-64 flex flex-wrap gap-2 mt-4 md:mt-0 z-10 relative">
+                        <span class="border-4 border-ink px-3 py-1 font-bold text-lg bg-acid text-ink">LAYOUT</span>
+                        <span class="border-4 border-ink px-3 py-1 font-bold text-lg bg-paper text-ink">TYPO</span>
+                    </div>
+                    <div class="w-32 md:text-right font-display text-4xl mt-4 md:mt-0 z-10 relative">2024</div>
+
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
+                        alt="Kroma" class="hover-img" style="border-color: #DFFF00; box-shadow: 16px 16px 0 #000;">
+                </a>
+            </div>
+        </section>
+
+        <!-- TOOLS / ARSENAL -->
+        <section id="arsenal"
+            class="border-heavy border-x-0 border-t-0 bg-alert py-24 px-4 md:px-12 relative overflow-hidden">
+            <h2 class="font-display text-7xl md:text-[10rem] text-paper text-center leading-none mb-16 tracking-tight relative z-10"
+                style="text-shadow: 10px 10px 0 #000;">WEAPONS OF CHOICE</h2>
+
+            <div class="flex flex-wrap justify-center gap-6 max-w-[1200px] mx-auto relative z-10">
+                <!-- Massive Tags -->
+                <div
+                    class="bg-paper border-heavy px-8 py-4 font-display text-5xl md:text-6xl hover:bg-acid hover:scale-110 shadow-brutal transition-all cursor-crosshair">
+                    ADOBE ILLUSTRATOR</div>
+                <div
+                    class="bg-ink text-paper border-heavy px-8 py-4 font-display text-5xl md:text-6xl hover:bg-cyan hover:text-ink hover:-rotate-3 shadow-magenta transition-all cursor-crosshair">
+                    PHOTOSHOP</div>
+                <div
+                    class="bg-magenta border-heavy px-8 py-4 font-display text-5xl md:text-6xl hover:bg-paper hover:rotate-3 shadow-brutal transition-all cursor-crosshair">
+                    INDESIGN</div>
+                <div
+                    class="bg-cyan border-heavy px-8 py-4 font-display text-5xl md:text-6xl hover:bg-alert hover:text-paper hover:scale-110 shadow-brutal transition-all cursor-crosshair">
+                    FIGMA</div>
+                <div
+                    class="bg-acid border-heavy px-8 py-4 font-display text-5xl md:text-6xl hover:bg-ink hover:text-acid hover:-rotate-2 shadow-brutal transition-all cursor-crosshair">
+                    AFTER EFFECTS</div>
+                <div
+                    class="bg-paper border-heavy px-8 py-4 font-display text-5xl md:text-6xl hover:bg-magenta hover:text-paper hover:scale-110 shadow-acid transition-all cursor-crosshair">
+                    PRINT PRODUCTION</div>
+                <div
+                    class="bg-ink text-paper border-heavy px-8 py-4 font-display text-5xl md:text-6xl hover:bg-acid hover:text-ink hover:rotate-2 shadow-brutal transition-all cursor-crosshair">
+                    TYPOGRAPHY</div>
+            </div>
+
+            <!-- Background Chaos -->
+            <div class="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
+                <div class="w-[150vw] h-24 bg-ink transform rotate-45"></div>
+                <div class="w-[150vw] h-24 bg-ink transform -rotate-45 absolute"></div>
+            </div>
+        </section>
+
+        <!-- CONTACT (SUMMON THE CHAOS) -->
+        <section id="contact" class="bg-magenta py-24 px-4 md:px-12 relative">
+            <div
+                class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 bg-paper border-heavy shadow-brutal">
+
+                <div
+                    class="p-8 md:p-16 border-b-6 lg:border-b-0 lg:border-r-[6px] border-ink bg-acid glitch-bg transition-all duration-300">
+                    <h2 class="font-display text-7xl md:text-9xl leading-[0.8] mb-8">SUMMON<br>THE<br>CHAOS.</h2>
+                    <p
+                        class="font-bold text-2xl border-l-8 border-ink pl-6 bg-paper/90 p-4 border-heavy shadow-magenta transform rotate-1">
+                        Ready to break the mold? Fill out the parameters. I will execute the sequence.
+                    </p>
+                </div>
+
+                <div class="p-8 md:p-16 bg-paper">
+                    <form class="flex flex-col gap-10">
+                        <div class="flex flex-col group">
+                            <label
+                                class="font-display text-3xl mb-2 group-focus-within:text-magenta transition-none">ENTER
+                                IDENTIFIER [NAME]</label>
+                            <input type="text"
+                                class="bg-paper border-heavy border-ink focus:border-magenta focus:bg-acid p-4 text-2xl font-bold focus:outline-none transition-none shadow-[8px_8px_0_#000] focus:shadow-[4px_4px_0_#000] focus:translate-x-1 focus:translate-y-1"
+                                placeholder="JOHN DOE">
+                        </div>
+                        <div class="flex flex-col group">
+                            <label
+                                class="font-display text-3xl mb-2 group-focus-within:text-cyan transition-none">RETURN
+                                NODE [EMAIL]</label>
+                            <input type="email"
+                                class="bg-paper border-heavy border-ink focus:border-cyan focus:bg-ink focus:text-cyan p-4 text-2xl font-bold focus:outline-none transition-none shadow-[8px_8px_0_#000] focus:shadow-[4px_4px_0_#000] focus:translate-x-1 focus:translate-y-1"
+                                placeholder="HELLO@WORLD.COM">
+                        </div>
+                        <div class="flex flex-col group">
+                            <label
+                                class="font-display text-3xl mb-2 group-focus-within:text-alert transition-none">DEFINE
+                                OBJECTIVE [MESSAGE]</label>
+                            <textarea rows="4"
+                                class="bg-paper border-heavy border-ink focus:border-alert focus:bg-paper p-4 text-2xl font-bold focus:outline-none resize-none transition-none shadow-[8px_8px_0_#000] focus:shadow-[4px_4px_0_#000] focus:translate-x-1 focus:translate-y-1"
+                                placeholder="WE NEED VISUAL AGGRESSION..."></textarea>
+                        </div>
+
+                        <button type="button"
+                            class="mt-4 bg-ink text-acid font-display text-5xl py-6 px-12 border-heavy border-ink hover:bg-alert hover:text-paper shadow-magenta hover:shadow-[4px_4px_0_#000] hover:translate-x-2 hover:translate-y-2 transition-all cursor-crosshair w-full md:w-auto self-start">
+                            EXECUTE SUBMISSION &crarr;
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer
+            class="border-heavy border-x-0 border-b-0 bg-ink text-paper py-12 px-4 md:px-12 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="font-display text-4xl bg-acid text-ink px-4 py-2 transform -rotate-2 border-4 border-paper">
+                &copy; 2026 M.A.
+            </div>
+            <div class="flex flex-wrap justify-center gap-6 font-display text-3xl">
+                <a href="#"
+                    class="hover:text-magenta hover:underline decoration-8 underline-offset-8 transition-all">BEHANCE</a>
+                <a href="https://www.instagram.com/lihtimkitsa/"
+                    class="hover:text-cyan hover:underline decoration-8 underline-offset-8 transition-all">INSTAGRAM</a>
+                <a href="https://www.linkedin.com/in/mithil-astik"
+                    class="hover:text-acid hover:underline decoration-8 underline-offset-8 transition-all">LINKEDIN</a>
+            </div>
+            <div class="font-bold text-xl tracking-widest text-center md:text-right border-4 border-paper p-4 blink"
+                style="animation-duration: 2s;">
+                NO ROUNDED CORNERS.<br>EVER.
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- BOOT SEQUENCE LOGIC ---
+        const bootScreen = document.getElementById('boot-screen');
+        const bootCounter = document.getElementById('boot-counter');
+        const bootLogs = document.getElementById('boot-logs');
+        const mainContent = document.getElementById('main-content');
+
+        const logLines = [
+            "> OVERRIDING DEFAULT CSS...",
+            "> INJECTING NEON VARIABLES...",
+            "> BREAKING GRID SYSTEMS...",
+            "> MAXIMIZING FONT WEIGHTS...",
+            "> REMOVING ALL ROUNDED CORNERS...",
+            "> SENSORY OVERLOAD READY."
+        ];
+
+        let counter = 0;
+        let logIndex = 0;
+
+        // Rapid chaotic counter
+        const bootInterval = setInterval(() => {
+            // Jump by random amounts
+            counter += Math.floor(Math.random() * 15) + 1;
+
+            // Add a log line occasionally
+            if (counter > (logIndex + 1) * 15 && logIndex < logLines.length) {
+                bootLogs.innerHTML += logLines[logIndex] + "<br>";
+                logIndex++;
+            }
+
+            if (counter >= 100) {
+                counter = 100;
+                clearInterval(bootInterval);
+                finishBoot();
+            }
+
+            bootCounter.innerText = counter < 10 ? '0' + counter + '%' : counter + '%';
+
+            // Randomly flash text colors during boot
+            const colors = ['#DFFF00', '#FF00FF', '#00FFFF', '#FF3300', '#FFFFFF'];
+            bootCounter.style.color = colors[Math.floor(Math.random() * colors.length)];
+
+        }, 80); // Fast interval
+
+        function finishBoot() {
+            bootCounter.innerText = "100%";
+            bootCounter.style.color = "#DFFF00";
+            bootCounter.classList.remove('blink');
+
+            setTimeout(() => {
+                // Harsh slide up
+                bootScreen.classList.add('crash');
+
+                // Show main content and allow scroll
+                setTimeout(() => {
+                    document.body.classList.remove('overflow-hidden');
+                    mainContent.classList.remove('opacity-0');
+                    bootScreen.remove(); // Remove from DOM
+                }, 400); // Wait for transform to finish
+            }, 800); // Brief pause at 100%
+        }
+
+        // --- HOVER IMAGE REVEAL LOGIC ---
+        const worksContainer = document.getElementById('works-container');
+        const workRows = document.querySelectorAll('.work-row');
+
+        workRows.forEach(row => {
+            const img = row.querySelector('.hover-img');
+
+            row.addEventListener('mousemove', (e) => {
+                if (!img) return;
+                // Get mouse position relative to the container
+                const rect = row.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Update image position
+                img.style.left = `${x}px`;
+                img.style.top = `${y}px`;
+            });
+        });
+    </script>
+</body>
+
+</html>
