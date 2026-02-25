@@ -688,14 +688,23 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
         // --- ENVIRONMENT CONFIGURATION ---
-        // FOR VERCEL DEPLOYMENT: PASTE YOUR SUPABASE URL AND ANON KEY HERE!
-        // Get these from Supabase Dashboard > Project Settings > API
+        // ⚠️ IMPORTANT VERCEL NOTE: Vercel Environment Variables DO NOT work in plain HTML files.
+        // You MUST paste your Supabase URL and Key directly inside the single quotes below.
+
         const supabaseUrl = 'https://mlctklppubajjhtwmnjm.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sY3RrbHBwdWJhampodHdtbmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTg5MTEsImV4cCI6MjA4NzU5NDkxMX0.cO2XLVGfqcJvxShu_pIetLHdnWGbM8IbLOJgCGnHdNg';
 
         let supabase = null;
-        if (supabaseUrl !== 'https://mlctklppubajjhtwmnjm.supabase.co') {
-            supabase = createClient(supabaseUrl, supabaseAnonKey);
+        try {
+            // Initialize if URL looks like a valid Supabase domain
+            if (supabaseUrl.includes('supabase.co')) {
+                supabase = createClient(supabaseUrl, supabaseAnonKey);
+                console.log("SYSTEM LOG: Supabase connection initialized.");
+            } else {
+                console.warn("SYSTEM LOG: Waiting for valid Supabase keys...");
+            }
+        } catch (e) {
+            console.error("SYSTEM ERROR: Failed to connect to Supabase", e);
         }
 
         // --- BOOT SEQUENCE --- 
