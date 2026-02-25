@@ -194,7 +194,8 @@
         }
 
         .glitch-bg:hover,
-        #mobile-menu-overlay .glitch-bg {
+        #mobile-menu-overlay .glitch-bg,
+        #admin-dashboard .glitch-bg {
             background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #FFF 25%, #FFF 75%, #000 75%, #000);
             background-position: 0 0, 10px 10px;
             background-size: 20px 20px;
@@ -291,10 +292,28 @@
                 cursor: cell;
             }
         }
+
+        /* Status UI Styling */
+        #status-modal {
+            display: none;
+        }
     </style>
 </head>
 
 <body class="font-mono bg-paper text-ink overflow-hidden">
+
+    <!-- FEEDBACK MODAL (BRUTALIST) -->
+    <div id="status-overlay"
+        class="fixed inset-0 z-[200] flex items-center justify-center bg-ink/80 p-4 pointer-events-none opacity-0 transition-opacity duration-300">
+        <div id="status-box"
+            class="max-w-xl w-full bg-alert border-heavy shadow-magenta p-8 md:p-12 transform scale-75 transition-transform duration-300">
+            <h3 id="status-title" class="font-display text-5xl md:text-7xl text-paper mb-4 leading-none">ERROR!</h3>
+            <p id="status-message" class="font-bold text-xl md:text-2xl text-ink bg-paper p-4 border-heavy mb-8">
+                CONNECTION FAILED.</p>
+            <button id="close-status"
+                class="bg-ink text-acid font-display text-3xl px-8 py-4 border-heavy hover:bg-magenta hover:text-paper transition-none w-full">ACKNOWLEDGE</button>
+        </div>
+    </div>
 
     <div id="boot-screen">
         <div class="font-display boot-text blink" id="boot-counter">00%</div>
@@ -305,6 +324,7 @@
         </div>
     </div>
 
+    <!-- MAIN INTERFACE -->
     <div id="main-content" class="min-h-screen flex flex-col relative opacity-0 transition-opacity duration-700">
 
         <div
@@ -352,27 +372,18 @@
             </button>
             <nav class="flex flex-col flex-grow p-4 gap-4 overflow-y-auto bg-cyan glitch-bg">
                 <a href="#manifesto"
-                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">
-                    01. THEORY
-                </a>
+                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">01.
+                    THEORY</a>
                 <a href="#works"
-                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">
-                    02. ARCHIVE
-                </a>
+                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">02.
+                    ARCHIVE</a>
                 <a href="#arsenal"
-                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">
-                    03. TOOLS
-                </a>
+                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">03.
+                    TOOLS</a>
                 <a href="#contact"
                     class="mobile-nav-link block bg-alert border-heavy p-6 font-display text-6xl text-paper shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none blink mt-auto"
-                    style="animation-duration: 0.5s;">
-                    + HIRE NOW
-                </a>
+                    style="animation-duration: 0.5s;">+ HIRE NOW</a>
             </nav>
-            <div
-                class="border-t-[4px] border-ink bg-ink text-paper font-mono text-sm p-2 text-center uppercase tracking-widest">
-                SYS_OVERRIDE // NO_ESCAPE
-            </div>
         </div>
 
         <div class="marquee-wrap bg-ink text-paper text-xl md:text-4xl font-display py-2">
@@ -381,13 +392,8 @@
             <div class="marquee flex-shrink-0">VISUAL AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// VISUAL
                 AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// </div>
         </div>
-        <div class="marquee-wrap bg-magenta text-ink text-lg md:text-3xl font-display py-1 border-t-0">
-            <div class="marquee marquee-reverse flex-shrink-0">MAXIMUM IMPACT /// DESTROY TO CREATE /// LOUD DESIGN ///
-                MAXIMUM IMPACT /// DESTROY TO CREATE /// LOUD DESIGN ///</div>
-            <div class="marquee marquee-reverse flex-shrink-0">MAXIMUM IMPACT /// DESTROY TO CREATE /// LOUD DESIGN ///
-                MAXIMUM IMPACT /// DESTROY TO CREATE /// LOUD DESIGN ///</div>
-        </div>
 
+        <!-- HERO SECTION -->
         <section id="hero"
             class="relative min-h-[70vh] md:min-h-[80vh] border-heavy border-x-0 border-t-0 bg-cyan flex flex-col justify-center overflow-hidden py-16 md:py-0">
             <div
@@ -422,6 +428,7 @@
             </div>
         </section>
 
+        <!-- MANIFESTO -->
         <section id="manifesto"
             class="border-heavy border-x-0 border-t-0 bg-ink text-paper py-16 md:py-20 px-4 md:px-12 relative">
             <div class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0">
@@ -458,6 +465,7 @@
                 style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);"></div>
         </section>
 
+        <!-- WORKS -->
         <section id="works" class="border-heavy border-x-0 border-t-0 bg-paper py-16 md:py-24 relative z-20">
             <div
                 class="px-4 md:px-12 mb-10 md:mb-16 flex flex-col md:flex-row justify-between md:items-end gap-4 md:gap-6">
@@ -488,14 +496,12 @@
                     <div class="w-full md:w-64 flex flex-wrap gap-2 mt-3 md:mt-0 z-10 relative">
                         <span
                             class="border-[3px] md:border-4 border-ink px-2 py-1 font-bold text-sm md:text-lg bg-cyan">BRAND_ID</span>
-                        <span
-                            class="border-[3px] md:border-4 border-ink px-2 py-1 font-bold text-sm md:text-lg bg-paper">PRINT</span>
                     </div>
                     <div
                         class="w-32 md:text-right font-display text-2xl sm:text-3xl md:text-4xl mt-3 md:mt-0 z-10 relative">
                         2026</div>
                     <img src="https://images.unsplash.com/photo-1600626337651-789f2144bd46?q=80&w=800&auto=format&fit=crop"
-                        alt="Aura" class="hover-img">
+                        alt="Work 1" class="hover-img">
                 </a>
 
                 <a href="#"
@@ -513,32 +519,12 @@
                         class="w-32 md:text-right font-display text-2xl sm:text-3xl md:text-4xl mt-3 md:mt-0 z-10 relative">
                         2025</div>
                     <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=800&auto=format&fit=crop"
-                        alt="Nexus" class="hover-img">
-                </a>
-
-                <a href="#"
-                    class="work-row border-heavy border-x-0 border-t-0 p-4 sm:p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center bg-paper hover:bg-magenta hover:text-paper transition-colors duration-0 relative overflow-hidden group">
-                    <div class="w-24 font-display text-3xl md:text-4xl text-alert mb-1 md:mb-0">#03</div>
-                    <div
-                        class="flex-grow font-display text-4xl sm:text-5xl md:text-7xl group-hover:pl-0 md:group-hover:pl-8 transition-all duration-200 z-10 relative">
-                        <span class="bg-paper group-hover:bg-transparent group-hover:text-paper px-1 md:px-2">PEARL
-                            '26</span>
-                    </div>
-                    <div class="w-full md:w-64 flex flex-wrap gap-2 mt-3 md:mt-0 z-10 relative">
-                        <span
-                            class="border-[3px] md:border-4 border-ink px-2 py-1 font-bold text-sm md:text-lg bg-acid text-ink">LAYOUT</span>
-                        <span
-                            class="border-[3px] md:border-4 border-ink px-2 py-1 font-bold text-sm md:text-lg bg-paper text-ink">TYPO</span>
-                    </div>
-                    <div
-                        class="w-32 md:text-right font-display text-2xl sm:text-3xl md:text-4xl mt-3 md:mt-0 z-10 relative">
-                        2024</div>
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
-                        alt="Kroma" class="hover-img" style="border-color: #DFFF00; box-shadow: 8px 8px 0 #000;">
+                        alt="Work 2" class="hover-img">
                 </a>
             </div>
         </section>
 
+        <!-- ARSENAL -->
         <section id="arsenal"
             class="border-heavy border-x-0 border-t-0 bg-alert py-16 md:py-24 px-4 md:px-12 relative overflow-hidden">
             <h2
@@ -557,15 +543,6 @@
                 <div
                     class="bg-cyan border-heavy px-4 py-2 md:px-8 md:py-4 font-display text-3xl sm:text-4xl md:text-6xl hover:bg-alert hover:text-paper hover:scale-110 shadow-brutal transition-all cursor-crosshair">
                     FIGMA</div>
-                <div
-                    class="bg-acid border-heavy px-4 py-2 md:px-8 md:py-4 font-display text-3xl sm:text-4xl md:text-6xl hover:bg-ink hover:text-acid hover:-rotate-2 shadow-brutal transition-all cursor-crosshair">
-                    AFTER EFFECTS</div>
-                <div
-                    class="bg-paper border-heavy px-4 py-2 md:px-8 md:py-4 font-display text-3xl sm:text-4xl md:text-6xl hover:bg-magenta hover:text-paper hover:scale-110 shadow-acid transition-all cursor-crosshair">
-                    PRINT PRODUCTION</div>
-                <div
-                    class="bg-ink text-paper border-heavy px-4 py-2 md:px-8 md:py-4 font-display text-3xl sm:text-4xl md:text-6xl hover:bg-acid hover:text-ink hover:rotate-2 shadow-brutal transition-all cursor-crosshair">
-                    TYPOGRAPHY</div>
             </div>
             <div class="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
                 <div class="w-[150vw] h-12 md:h-24 bg-ink transform rotate-45"></div>
@@ -573,6 +550,7 @@
             </div>
         </section>
 
+        <!-- CONTACT -->
         <section id="contact" class="bg-magenta py-16 md:py-24 px-4 md:px-12 relative">
             <div
                 class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-0 md:gap-12 bg-paper border-heavy shadow-brutal">
@@ -586,20 +564,20 @@
                     </p>
                 </div>
                 <div class="p-6 md:p-16 bg-paper">
-                    <form class="flex flex-col gap-6 md:gap-10">
+                    <form id="contact-form" class="flex flex-col gap-6 md:gap-10">
                         <div class="flex flex-col group">
                             <label
                                 class="font-display text-2xl md:text-3xl mb-1 md:mb-2 group-focus-within:text-magenta transition-none">ENTER
                                 IDENTIFIER [NAME]</label>
-                            <input type="text"
+                            <input type="text" id="form-name" required
                                 class="bg-paper border-heavy border-ink focus:border-magenta focus:bg-acid p-3 md:p-4 text-xl md:text-2xl font-bold focus:outline-none transition-none shadow-[4px_4px_0_#000] md:shadow-[8px_8px_0_#000] focus:shadow-[2px_2px_0_#000] focus:translate-x-1 focus:translate-y-1"
-                                placeholder="JOHN DOE">
+                                placeholder="YOUR NAME">
                         </div>
                         <div class="flex flex-col group">
                             <label
                                 class="font-display text-2xl md:text-3xl mb-1 md:mb-2 group-focus-within:text-cyan transition-none">RETURN
                                 NODE [EMAIL]</label>
-                            <input type="email"
+                            <input type="email" id="form-email" required
                                 class="bg-paper border-heavy border-ink focus:border-cyan focus:bg-ink focus:text-cyan p-3 md:p-4 text-xl md:text-2xl font-bold focus:outline-none transition-none shadow-[4px_4px_0_#000] md:shadow-[8px_8px_0_#000] focus:shadow-[2px_2px_0_#000] focus:translate-x-1 focus:translate-y-1"
                                 placeholder="HELLO@WORLD.COM">
                         </div>
@@ -607,12 +585,12 @@
                             <label
                                 class="font-display text-2xl md:text-3xl mb-1 md:mb-2 group-focus-within:text-alert transition-none">DEFINE
                                 OBJECTIVE [MESSAGE]</label>
-                            <textarea rows="4"
+                            <textarea rows="4" id="form-message" required
                                 class="bg-paper border-heavy border-ink focus:border-alert focus:bg-paper p-3 md:p-4 text-xl md:text-2xl font-bold focus:outline-none resize-none transition-none shadow-[4px_4px_0_#000] md:shadow-[8px_8px_0_#000] focus:shadow-[2px_2px_0_#000] focus:translate-x-1 focus:translate-y-1"
                                 placeholder="WE NEED VISUAL AGGRESSION..."></textarea>
                         </div>
-                        <button type="button"
-                            class="mt-2 md:mt-4 bg-ink text-acid font-display text-3xl md:text-5xl py-4 md:py-6 px-6 md:px-12 border-heavy border-ink hover:bg-alert hover:text-paper shadow-magenta hover:shadow-[2px_2px_0_#000] hover:translate-x-1 hover:translate-y-1 md:hover:translate-x-2 md:hover:translate-y-2 transition-all cursor-crosshair w-full md:w-auto self-start">
+                        <button type="submit" id="submit-btn"
+                            class="mt-2 md:mt-4 bg-ink text-acid font-display text-3xl md:text-5xl py-4 md:py-6 px-6 md:px-12 border-heavy border-ink hover:bg-alert hover:text-paper shadow-magenta hover:shadow-[2px_2px_0_#000] hover:translate-x-1 hover:translate-y-1 md:hover:translate-x-2 md:hover:translate-y-2 transition-all cursor-crosshair w-full md:w-auto self-start disabled:opacity-50 disabled:cursor-not-allowed">
                             EXECUTE SUBMISSION &crarr;
                         </button>
                     </form>
@@ -620,6 +598,7 @@
             </div>
         </section>
 
+        <!-- FOOTER -->
         <footer
             class="border-heavy border-x-0 border-b-0 bg-ink text-paper py-10 md:py-12 px-4 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8 text-center md:text-left">
             <div
@@ -635,16 +614,91 @@
                 <a href="https://www.linkedin.com/in/mithil-astik"
                     class="hover:text-acid hover:underline decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8 transition-all">LINKEDIN</a>
             </div>
-            <div class="font-bold text-lg md:text-xl tracking-widest text-center md:text-right border-4 border-paper p-3 md:p-4 blink w-full md:w-auto"
-                style="animation-duration: 2s;">
-                NO ROUNDED CORNERS.<br>EVER.
+
+            <div class="flex flex-col md:flex-row gap-4 md:gap-8 items-center">
+                <button id="admin-open-btn"
+                    class="font-display text-2xl bg-paper text-ink border-4 border-paper px-4 py-2 hover:bg-alert hover:text-paper hover:border-alert transition-none shadow-magenta">
+                    [ SYS.ADMIN ]
+                </button>
+                <div class="font-bold text-lg md:text-xl tracking-widest text-center md:text-right border-4 border-paper p-3 md:p-4 blink w-full md:w-auto"
+                    style="animation-duration: 2s;">
+                    NO ROUNDED CORNERS.<br>EVER.
+                </div>
             </div>
         </footer>
 
     </div>
 
-    <script>
-        // --- BOOT SEQUENCE LOGIC ---
+    <!-- ADMIN DASHBOARD OVERLAY -->
+    <div id="admin-dashboard" class="fixed inset-0 z-[300] bg-ink text-paper flex-col hidden overflow-hidden">
+        <div
+            class="border-b-[6px] border-paper bg-alert p-6 flex flex-col md:flex-row justify-between items-center shrink-0 gap-4">
+            <h2
+                class="font-display text-4xl sm:text-6xl text-ink leading-none shadow-[4px_4px_0_#FFF] bg-acid px-4 border-4 border-ink transform -rotate-1 inline-block">
+                TERMINAL</h2>
+            <div class="flex gap-4">
+                <button id="admin-refresh-btn"
+                    class="hidden font-display text-2xl sm:text-4xl bg-ink text-paper border-4 border-paper px-6 py-4 hover:bg-acid hover:text-ink hover:border-ink transition-none shadow-brutal active:translate-y-2 active:shadow-none">
+                    REFRESH
+                </button>
+                <button id="admin-logout-btn"
+                    class="hidden font-display text-2xl sm:text-4xl bg-ink text-paper border-4 border-paper px-6 py-4 hover:bg-cyan hover:text-ink hover:border-ink transition-none shadow-brutal active:translate-y-2 active:shadow-none">
+                    LOGOUT
+                </button>
+                <button id="admin-close-btn"
+                    class="font-display text-2xl sm:text-4xl bg-ink text-paper border-4 border-paper px-6 py-4 hover:bg-magenta hover:text-ink hover:border-ink transition-none shadow-brutal active:translate-y-2 active:shadow-none">
+                    [ X ] ABORT
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-grow overflow-y-auto p-4 sm:p-8 md:p-12 bg-ink glitch-bg relative flex flex-col items-center">
+
+            <!-- ADMIN LOGIN VIEW -->
+            <div id="admin-login-view"
+                class="w-full max-w-[600px] bg-paper text-ink p-8 md:p-12 border-heavy shadow-[16px_16px_0_#FF00FF] relative z-10 mt-12 md:mt-24 hidden">
+                <h3 class="font-display text-5xl mb-8 uppercase border-b-4 border-ink pb-2">ADMIN AUTHENTICATION</h3>
+                <form id="admin-login-form" class="flex flex-col gap-6">
+                    <div class="flex flex-col group">
+                        <label
+                            class="font-display text-2xl mb-2 group-focus-within:text-magenta transition-none">PASSPHRASE
+                            [PASSWORD]</label>
+                        <input type="password" id="admin-password" required
+                            class="bg-paper border-heavy border-ink focus:border-magenta p-3 md:p-4 text-xl md:text-2xl font-bold focus:outline-none focus:bg-ink focus:text-magenta shadow-[4px_4px_0_#000] focus:shadow-[2px_2px_0_#000] focus:translate-x-1 focus:translate-y-1 transition-none">
+                    </div>
+                    <button type="submit" id="admin-login-submit"
+                        class="mt-4 bg-ink text-acid font-display text-3xl md:text-4xl py-4 border-heavy border-ink hover:bg-alert hover:text-paper shadow-magenta hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0_#000] transition-all disabled:opacity-50">
+                        INITIATE OVERRIDE
+                    </button>
+                </form>
+            </div>
+
+            <!-- ADMIN CONTENT VIEW -->
+            <div class="w-full max-w-[1200px] relative z-10 hidden" id="admin-content-view">
+                <div id="messages-container" class="w-full">
+                    <!-- Messages populated via JS -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- GLOBAL SUPABASE STORAGE LOGIC FOR VERCEL -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        // --- ENVIRONMENT CONFIGURATION ---
+        // FOR VERCEL DEPLOYMENT: PASTE YOUR SUPABASE URL AND ANON KEY HERE!
+        // Get these from Supabase Dashboard > Project Settings > API
+        const supabaseUrl = 'https://mlctklppubajjhtwmnjm.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sY3RrbHBwdWJhampodHdtbmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTg5MTEsImV4cCI6MjA4NzU5NDkxMX0.cO2XLVGfqcJvxShu_pIetLHdnWGbM8IbLOJgCGnHdNg';
+
+        let supabase = null;
+        if (supabaseUrl !== 'https://mlctklppubajjhtwmnjm.supabase.co') {
+            supabase = createClient(supabaseUrl, supabaseAnonKey);
+        }
+
+        // --- BOOT SEQUENCE --- 
         const bootScreen = document.getElementById('boot-screen');
         const bootCounter = document.getElementById('boot-counter');
         const bootLogs = document.getElementById('boot-logs');
@@ -677,10 +731,8 @@
             }
 
             bootCounter.innerText = counter < 10 ? '0' + counter + '%' : counter + '%';
-
             const colors = ['#DFFF00', '#FF00FF', '#00FFFF', '#FF3300', '#FFFFFF'];
             bootCounter.style.color = colors[Math.floor(Math.random() * colors.length)];
-
         }, 80);
 
         function finishBoot() {
@@ -690,7 +742,6 @@
 
             setTimeout(() => {
                 bootScreen.classList.add('crash');
-
                 setTimeout(() => {
                     document.body.classList.remove('overflow-hidden');
                     mainContent.classList.remove('opacity-0');
@@ -699,11 +750,9 @@
             }, 800);
         }
 
-        // --- HOVER IMAGE REVEAL LOGIC (DESKTOP ONLY) ---
+        // --- HOVER REVEAL ---
         if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-            const worksContainer = document.getElementById('works-container');
             const workRows = document.querySelectorAll('.work-row');
-
             workRows.forEach(row => {
                 const img = row.querySelector('.hover-img');
                 row.addEventListener('mousemove', (e) => {
@@ -717,7 +766,7 @@
             });
         }
 
-        // --- MOBILE MENU TAKEOVER LOGIC ---
+        // --- MOBILE MENU ---
         const menuTrigger = document.getElementById('mobile-menu-trigger');
         const closeMenuBtn = document.getElementById('close-menu-btn');
         const menuOverlay = document.getElementById('mobile-menu-overlay');
@@ -725,16 +774,13 @@
 
         function toggleMobileMenu() {
             const isClosed = menuOverlay.classList.contains('-translate-y-full');
-
             if (isClosed) {
-                // Slam it open
                 menuOverlay.classList.remove('-translate-y-full', 'pointer-events-none');
                 document.body.classList.add('overflow-hidden');
                 menuTrigger.innerHTML = "[ X ]";
                 menuTrigger.classList.replace('bg-ink', 'bg-alert');
                 menuTrigger.classList.replace('text-acid', 'text-ink');
             } else {
-                // Slam it shut
                 menuOverlay.classList.add('-translate-y-full', 'pointer-events-none');
                 document.body.classList.remove('overflow-hidden');
                 menuTrigger.innerHTML = "[ NAV ]";
@@ -745,9 +791,238 @@
 
         menuTrigger.addEventListener('click', toggleMobileMenu);
         closeMenuBtn.addEventListener('click', toggleMobileMenu);
+        mobileNavLinks.forEach(link => link.addEventListener('click', toggleMobileMenu));
 
-        mobileNavLinks.forEach(link => {
-            link.addEventListener('click', toggleMobileMenu);
+        // --- UI UTILS ---
+        const statusOverlay = document.getElementById('status-overlay');
+        const statusBox = document.getElementById('status-box');
+        const statusTitle = document.getElementById('status-title');
+        const statusMessage = document.getElementById('status-message');
+        const closeStatusBtn = document.getElementById('close-status');
+        const contactForm = document.getElementById('contact-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function showStatus(title, msg, type = 'error') {
+            statusTitle.innerText = title;
+            statusMessage.innerText = msg;
+
+            if (type === 'success') {
+                statusBox.classList.replace('bg-alert', 'bg-acid');
+                statusTitle.classList.replace('text-paper', 'text-ink');
+            } else {
+                statusBox.classList.replace('bg-acid', 'bg-alert');
+                statusTitle.classList.replace('text-ink', 'text-paper');
+            }
+
+            statusOverlay.classList.remove('pointer-events-none', 'opacity-0');
+            statusBox.classList.replace('scale-75', 'scale-100');
+        }
+
+        function hideStatus() {
+            statusOverlay.classList.add('pointer-events-none', 'opacity-0');
+            statusBox.classList.replace('scale-100', 'scale-75');
+        }
+
+        closeStatusBtn.addEventListener('click', hideStatus);
+
+        // --- FORM SUBMISSION (SUPABASE CLOUD STORAGE) ---
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!supabase) {
+                showStatus("SYSTEM OFFLINE", "DATABASE NOT CONFIGURED. PLEASE ADD SUPABASE KEYS.");
+                return;
+            }
+
+            const name = document.getElementById('form-name').value;
+            const email = document.getElementById('form-email').value;
+            const message = document.getElementById('form-message').value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "EXECUTING...";
+
+            try {
+                const { error } = await supabase
+                    .from('messages')
+                    .insert([{ name, email, message }]);
+
+                if (error) throw error;
+
+                showStatus("MISSION SUCCESS", "TRANSMISSION RECEIVED. EXPECT CHAOS.", "success");
+                contactForm.reset();
+            } catch (err) {
+                console.error(err);
+                showStatus("SYSTEM FAILURE", "CLOUD STORAGE REJECTED SUBMISSION.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "EXECUTE SUBMISSION &crarr;";
+            }
+        });
+
+        // --- ADMIN DASHBOARD ---
+        const adminOpenBtn = document.getElementById('admin-open-btn');
+        const adminCloseBtn = document.getElementById('admin-close-btn');
+        const adminRefreshBtn = document.getElementById('admin-refresh-btn');
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
+        const adminDashboard = document.getElementById('admin-dashboard');
+
+        const adminLoginView = document.getElementById('admin-login-view');
+        const adminContentView = document.getElementById('admin-content-view');
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const adminLoginSubmit = document.getElementById('admin-login-submit');
+        const messagesContainer = document.getElementById('messages-container');
+
+        let isAdminAuthenticated = false;
+        const ADMIN_PASSPHRASE = "mithu0406";
+
+        function updateAdminUI() {
+            if (isAdminAuthenticated) {
+                adminLoginView.classList.add('hidden');
+                adminContentView.classList.remove('hidden');
+                adminLogoutBtn.classList.remove('hidden');
+                adminRefreshBtn.classList.remove('hidden');
+                fetchMessages(); // Fetch from Supabase
+            } else {
+                adminLoginView.classList.remove('hidden');
+                adminContentView.classList.add('hidden');
+                adminLogoutBtn.classList.add('hidden');
+                adminRefreshBtn.classList.add('hidden');
+            }
+        }
+
+        adminOpenBtn.addEventListener('click', () => {
+            adminDashboard.classList.remove('hidden');
+            adminDashboard.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            updateAdminUI();
+        });
+
+        adminCloseBtn.addEventListener('click', () => {
+            adminDashboard.classList.add('hidden');
+            adminDashboard.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        });
+
+        adminRefreshBtn.addEventListener('click', () => {
+            fetchMessages();
+        });
+
+        // Handle Admin Login Submission 
+        adminLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('admin-password').value;
+
+            adminLoginSubmit.disabled = true;
+            adminLoginSubmit.innerText = "AUTHENTICATING...";
+
+            setTimeout(() => {
+                if (pass === ADMIN_PASSPHRASE) {
+                    isAdminAuthenticated = true;
+                    adminLoginForm.reset();
+                    updateAdminUI();
+                } else {
+                    showStatus("ACCESS DENIED", "INVALID PASSPHRASE.");
+                }
+                adminLoginSubmit.disabled = false;
+                adminLoginSubmit.innerText = "INITIATE OVERRIDE";
+            }, 600);
+        });
+
+        // Handle Admin Logout
+        adminLogoutBtn.addEventListener('click', () => {
+            isAdminAuthenticated = false;
+            updateAdminUI();
+        });
+
+        // --- FETCH MESSAGES FROM SUPABASE ---
+        async function fetchMessages() {
+            if (!supabase) {
+                messagesContainer.innerHTML = `<div class="p-8 border-heavy border-alert bg-alert text-paper text-center font-display text-4xl shadow-brutal mt-12">SYSTEM OFFLINE. CONFIGURE SUPABASE KEYS.</div>`;
+                return;
+            }
+
+            messagesContainer.innerHTML = `<div class="p-8 border-heavy border-paper text-center font-display text-3xl text-acid blink mt-12">DOWNLOADING FROM MAINFRAME...</div>`;
+
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Error fetching messages:", error);
+                messagesContainer.innerHTML = `<div class="p-8 border-heavy border-alert bg-alert text-paper text-center font-display text-4xl shadow-brutal mt-12">CRITICAL DB ERROR.</div>`;
+                return;
+            }
+
+            renderMessages(data);
+        }
+
+        // Render Message Cards
+        function renderMessages(msgs) {
+            if (!msgs || msgs.length === 0) {
+                messagesContainer.innerHTML = `<div class="p-12 border-heavy border-paper text-center font-display text-5xl text-paper bg-ink opacity-50 border-dashed mt-12">ARCHIVE EMPTY.</div>`;
+                return;
+            }
+
+            messagesContainer.innerHTML = msgs.map((msg, idx) => {
+                const dateStr = msg.created_at ? new Date(msg.created_at).toLocaleString() : 'JUST NOW';
+                const shadowColor = idx % 2 === 0 ? '#DFFF00' : '#00FFFF';
+
+                return `
+                <div class="border-heavy border-paper p-6 md:p-8 mb-8 bg-paper text-ink transition-transform hover:-translate-y-2 group relative z-10" style="box-shadow: 12px 12px 0px ${shadowColor};">
+                    <div class="flex flex-col md:flex-row justify-between mb-4 border-b-4 border-ink pb-4 gap-4">
+                        <div>
+                            <div class="font-display text-4xl md:text-5xl uppercase tracking-tighter">${msg.name}</div>
+                            <div class="font-bold text-magenta text-xl md:text-2xl mt-1 underline decoration-4 underline-offset-4 break-all">${msg.email}</div>
+                        </div>
+                        <div class="flex flex-col items-start md:items-end gap-3 shrink-0">
+                            <div class="font-mono font-bold text-sm md:text-lg text-left md:text-right bg-ink text-acid p-2 border-2 border-ink shadow-[4px_4px_0_#FF00FF]">
+                                LOG // ${dateStr}
+                            </div>
+                            <button data-id="${msg.id}" class="delete-msg-btn bg-alert text-paper font-display text-xl px-4 py-2 border-4 border-ink hover:bg-ink hover:text-alert shadow-[4px_4px_0_#000] active:translate-y-1 active:shadow-none transition-all">
+                                [ X ] PURGE
+                            </button>
+                        </div>
+                    </div>
+                    <div class="font-bold text-xl md:text-3xl whitespace-pre-wrap leading-tight mt-6">${msg.message}</div>
+                    <div class="absolute -top-4 -right-4 bg-ink text-cyan font-display text-2xl px-3 py-1 border-4 border-paper shadow-brutal hidden md:block opacity-0 group-hover:opacity-100 transition-opacity">
+                        REF_ID: ${msg.id.substring(0, 8)}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Handle Delete Button Clicks
+        messagesContainer.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-msg-btn')) {
+                const msgId = e.target.getAttribute('data-id');
+                const btn = e.target;
+
+                btn.innerText = "PURGING...";
+                btn.classList.replace('bg-alert', 'bg-ink');
+                btn.classList.replace('text-paper', 'text-acid');
+                btn.disabled = true;
+
+                try {
+                    const { error } = await supabase
+                        .from('messages')
+                        .delete()
+                        .eq('id', msgId);
+
+                    if (error) throw error;
+
+                    fetchMessages(); // Refresh UI after delete
+                } catch (err) {
+                    console.error("Delete failed", err);
+                    showStatus("PURGE FAILED", "DATABASE REJECTED DELETION. PERMISSION DENIED.");
+
+                    btn.innerText = "[ X ] PURGE";
+                    btn.classList.replace('bg-ink', 'bg-alert');
+                    btn.classList.replace('text-acid', 'text-paper');
+                    btn.disabled = false;
+                }
+            }
         });
     </script>
 </body>
