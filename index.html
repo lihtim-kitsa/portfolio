@@ -695,14 +695,22 @@
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sY3RrbHBwdWJhampodHdtbmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTg5MTEsImV4cCI6MjA4NzU5NDkxMX0.cO2XLVGfqcJvxShu_pIetLHdnWGbM8IbLOJgCGnHdNg';
 
         let supabase = null;
-        if (supabaseUrl !== 'https://mlctklppubajjhtwmnjm.supabase.co') {
-            supabase = createClient(supabaseUrl, supabaseAnonKey, {
-                auth: {
-                    persistSession: false, // PREVENTS CRASHES IN SNAPCHAT/IG BROWSER
-                    autoRefreshToken: false,
-                    detectSessionInUrl: false
-                }
-            });
+        try {
+            // Initialize if URL looks like a valid Supabase domain
+            if (supabaseUrl.includes('supabase.co')) {
+                supabase = createClient(supabaseUrl, supabaseAnonKey, {
+                    auth: {
+                        persistSession: false, // CRITICAL FIX: PREVENTS CRASHES IN SNAPCHAT/IG BROWSER
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false
+                    }
+                });
+                console.log("SYSTEM LOG: Supabase connection initialized.");
+            } else {
+                console.warn("SYSTEM LOG: Waiting for valid Supabase keys...");
+            }
+        } catch (e) {
+            console.error("SYSTEM ERROR: Failed to connect to Supabase", e);
         }
 
         // --- BOOT SEQUENCE --- 
