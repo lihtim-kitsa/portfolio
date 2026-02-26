@@ -175,6 +175,7 @@
 
         .spin-chaos {
             animation: spin 8s linear infinite;
+            display: inline-block;
         }
 
         @keyframes spin {
@@ -292,11 +293,6 @@
                 cursor: cell;
             }
         }
-
-        /* Status UI Styling */
-        #status-modal {
-            display: none;
-        }
     </style>
 </head>
 
@@ -307,9 +303,11 @@
         class="fixed inset-0 z-[200] flex items-center justify-center bg-ink/80 p-4 pointer-events-none opacity-0 transition-opacity duration-300">
         <div id="status-box"
             class="max-w-xl w-full bg-alert border-heavy shadow-magenta p-8 md:p-12 transform scale-75 transition-transform duration-300">
-            <h3 id="status-title" class="font-display text-5xl md:text-7xl text-paper mb-4 leading-none">ERROR!</h3>
-            <p id="status-message" class="font-bold text-xl md:text-2xl text-ink bg-paper p-4 border-heavy mb-8">
-                CONNECTION FAILED.</p>
+            <h3 id="status-title" class="font-display text-5xl md:text-7xl text-paper mb-4 leading-none break-words">
+                ERROR!</h3>
+            <p id="status-message"
+                class="font-bold text-xl md:text-2xl text-ink bg-paper p-4 border-heavy mb-8 break-words">CONNECTION
+                FAILED.</p>
             <button id="close-status"
                 class="bg-ink text-acid font-display text-3xl px-8 py-4 border-heavy hover:bg-magenta hover:text-paper transition-none w-full">ACKNOWLEDGE</button>
         </div>
@@ -328,8 +326,8 @@
     <div id="main-content" class="min-h-screen flex flex-col relative opacity-0 transition-opacity duration-700">
 
         <div
-            class="fixed top-24 right-10 z-50 w-32 h-32 bg-acid rounded-full border-heavy flex items-center justify-center spin-chaos shadow-magenta pointer-events-none mix-blend-difference hidden md:flex">
-            <span class="font-display text-4xl text-ink text-center leading-none">100%<br>RAW</span>
+            class="fixed top-24 right-10 z-50 w-32 h-32 bg-acid rounded-full border-heavy flex items-center justify-center shadow-magenta pointer-events-none mix-blend-difference hidden md:flex">
+            <span class="font-display text-4xl text-ink text-center leading-none spin-chaos">100%<br>RAW</span>
         </div>
         <div
             class="fixed bottom-10 left-10 z-50 bg-cyan border-heavy px-4 py-2 transform -rotate-12 shadow-brutal pointer-events-none hidden lg:block">
@@ -683,35 +681,12 @@
         </div>
     </div>
 
-    <!-- GLOBAL SUPABASE STORAGE LOGIC FOR VERCEL -->
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
+    <!-- PURE FETCH API FOR SUPABASE (BYPASSES MOBILE RESTRICTIONS) -->
+    <script>
         // --- ENVIRONMENT CONFIGURATION ---
-        // ⚠️ IMPORTANT VERCEL NOTE: Vercel Environment Variables DO NOT work in plain HTML files.
-        // You MUST paste your Supabase URL and Key directly inside the single quotes below.
-
+        // REPLACE THESE WITH YOUR ACTUAL KEYS!
         const supabaseUrl = 'https://mlctklppubajjhtwmnjm.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sY3RrbHBwdWJhampodHdtbmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTg5MTEsImV4cCI6MjA4NzU5NDkxMX0.cO2XLVGfqcJvxShu_pIetLHdnWGbM8IbLOJgCGnHdNg';
-
-        let supabase = null;
-        try {
-            // Initialize if URL looks like a valid Supabase domain
-            if (supabaseUrl.includes('supabase.co')) {
-                supabase = createClient(supabaseUrl, supabaseAnonKey, {
-                    auth: {
-                        persistSession: false, // CRITICAL FIX: PREVENTS CRASHES IN SNAPCHAT/IG BROWSER
-                        autoRefreshToken: false,
-                        detectSessionInUrl: false
-                    }
-                });
-                console.log("SYSTEM LOG: Supabase connection initialized.");
-            } else {
-                console.warn("SYSTEM LOG: Waiting for valid Supabase keys...");
-            }
-        } catch (e) {
-            console.error("SYSTEM ERROR: Failed to connect to Supabase", e);
-        }
 
         // --- BOOT SEQUENCE --- 
         const bootScreen = document.getElementById('boot-screen');
@@ -840,12 +815,12 @@
 
         closeStatusBtn.addEventListener('click', hideStatus);
 
-        // --- FORM SUBMISSION (SUPABASE CLOUD STORAGE) ---
+        // --- FORM SUBMISSION (PURE FETCH API) ---
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!supabase) {
-                showStatus("SYSTEM OFFLINE", "DATABASE NOT CONFIGURED. PLEASE ADD SUPABASE KEYS.");
+            if (supabaseUrl === 'YOUR_SUPABASE_URL') {
+                showStatus("SYSTEM OFFLINE", "DATABASE NOT CONFIGURED. ADD KEYS TO HTML FILE.");
                 return;
             }
 
@@ -857,17 +832,35 @@
             submitBtn.innerText = "EXECUTING...";
 
             try {
-                const { error } = await supabase
-                    .from('messages')
-                    .insert([{ name, email, message }]);
+                const response = await fetch(`${supabaseUrl}/rest/v1/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ name, email, message })
+                });
 
-                if (error) throw error;
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Failed to save to database");
+                }
 
                 showStatus("MISSION SUCCESS", "TRANSMISSION RECEIVED. EXPECT CHAOS.", "success");
                 contactForm.reset();
             } catch (err) {
-                console.error(err);
-                showStatus("SYSTEM FAILURE", "CLOUD STORAGE REJECTED SUBMISSION.");
+                console.error("Fetch Error Details:", err);
+                const errMsg = err.message || JSON.stringify(err);
+
+                // Detailed error for missing RLS (Row Level Security)
+                if (errMsg.includes('violates row-level security')) {
+                    showStatus("SYSTEM FAILURE", "DB ERROR: YOU MUST DISABLE RLS IN SUPABASE SQL EDITOR TO ALLOW WRITING.");
+                } else {
+                    showStatus("SYSTEM FAILURE", "DB ERROR: " + errMsg.toUpperCase());
+                }
+
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = "EXECUTE SUBMISSION &crarr;";
@@ -896,7 +889,7 @@
                 adminContentView.classList.remove('hidden');
                 adminLogoutBtn.classList.remove('hidden');
                 adminRefreshBtn.classList.remove('hidden');
-                fetchMessages(); // Fetch from Supabase
+                fetchMessages();
             } else {
                 adminLoginView.classList.remove('hidden');
                 adminContentView.classList.add('hidden');
@@ -949,27 +942,36 @@
             updateAdminUI();
         });
 
-        // --- FETCH MESSAGES FROM SUPABASE ---
+        // --- FETCH MESSAGES PURE FETCH API ---
         async function fetchMessages() {
-            if (!supabase) {
+            if (supabaseUrl === 'YOUR_SUPABASE_URL') {
                 messagesContainer.innerHTML = `<div class="p-8 border-heavy border-alert bg-alert text-paper text-center font-display text-4xl shadow-brutal mt-12">SYSTEM OFFLINE. CONFIGURE SUPABASE KEYS.</div>`;
                 return;
             }
 
             messagesContainer.innerHTML = `<div class="p-8 border-heavy border-paper text-center font-display text-3xl text-acid blink mt-12">DOWNLOADING FROM MAINFRAME...</div>`;
 
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .order('created_at', { ascending: false });
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/messages?order=created_at.desc`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-            if (error) {
-                console.error("Error fetching messages:", error);
-                messagesContainer.innerHTML = `<div class="p-8 border-heavy border-alert bg-alert text-paper text-center font-display text-4xl shadow-brutal mt-12">CRITICAL DB ERROR.</div>`;
-                return;
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Failed to fetch");
+                }
+
+                const data = await response.json();
+                renderMessages(data);
+            } catch (err) {
+                console.error("Error fetching messages:", err);
+                messagesContainer.innerHTML = `<div class="p-8 border-heavy border-alert bg-alert text-paper text-center font-display text-4xl shadow-brutal mt-12 break-words">DB ERROR: ${err.message.toUpperCase()}</div>`;
             }
-
-            renderMessages(data);
         }
 
         // Render Message Cards
@@ -1008,7 +1010,7 @@
             }).join('');
         }
 
-        // Handle Delete Button Clicks
+        // Handle Delete Button Clicks (PURE FETCH API)
         messagesContainer.addEventListener('click', async (e) => {
             if (e.target.classList.contains('delete-msg-btn')) {
                 const msgId = e.target.getAttribute('data-id');
@@ -1020,17 +1022,24 @@
                 btn.disabled = true;
 
                 try {
-                    const { error } = await supabase
-                        .from('messages')
-                        .delete()
-                        .eq('id', msgId);
+                    const response = await fetch(`${supabaseUrl}/rest/v1/messages?id=eq.${msgId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': supabaseAnonKey,
+                            'Authorization': `Bearer ${supabaseAnonKey}`
+                        }
+                    });
 
-                    if (error) throw error;
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || "Failed to delete");
+                    }
 
                     fetchMessages(); // Refresh UI after delete
                 } catch (err) {
                     console.error("Delete failed", err);
-                    showStatus("PURGE FAILED", "DATABASE REJECTED DELETION. PERMISSION DENIED.");
+                    const errMsg = err.message || JSON.stringify(err);
+                    showStatus("PURGE FAILED", "DB ERROR: " + errMsg.toUpperCase());
 
                     btn.innerText = "[ X ] PURGE";
                     btn.classList.replace('bg-ink', 'bg-alert');
