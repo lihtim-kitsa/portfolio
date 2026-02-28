@@ -1,33 +1,53 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MITHIL ASTIK // SYSTEM OVERLOAD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mithil Astik // Designer Dashboard</title>
 
+    <!-- Theme Initialization Script (Prevents FOUC) -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
+    <!-- Fonts: Space Grotesk & Space Mono for Brutalist Aesthetic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
         rel="stylesheet">
 
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
+                        sans: ['"Space Grotesk"', 'sans-serif'],
                         mono: ['"Space Mono"', 'monospace'],
-                        display: ['"Anton"', 'sans-serif'],
                     },
                     colors: {
-                        ink: '#000000',
-                        paper: '#FFFFFF',
-                        acid: '#DFFF00',   /* Acid Neon Green */
-                        magenta: '#FF00FF', /* Hot Pink/Magenta */
-                        cyan: '#00FFFF',    /* Electric Cyan */
-                        alert: '#FF3300',   /* Warning Red */
+                        base: 'var(--color-base)',
+                        dark: 'var(--color-dark)',
+                        white: 'var(--color-white)',
+                        brutalRed: 'var(--color-red)',
+                        brutalBlue: 'var(--color-blue)',
+                        brutalYellow: 'var(--color-yellow)',
+                        brutalGreen: 'var(--color-green)',
+                    },
+                    boxShadow: {
+                        'brutal': '8px 8px 0px 0px var(--color-dark)',
+                        'brutal-sm': '4px 4px 0px 0px var(--color-dark)',
+                        'brutal-active': '2px 2px 0px 0px var(--color-dark)',
                     }
                 }
             }
@@ -35,122 +55,125 @@
     </script>
 
     <style>
+        /* CSS Variables for Dynamic Theming */
+        :root {
+            --color-base: #f4f4f0;
+            --color-dark: #111111;
+            --color-white: #ffffff;
+            --color-red: #ff2a2a;
+            --color-blue: #0055ff;
+            --color-yellow: #ffea00;
+            --color-green: #00ff44;
+        }
+
+        :root.dark {
+            --color-base: #111111;
+            --color-dark: #f4f4f0;
+            --color-white: #1a1a1a;
+            --color-red: #ff2a2a;
+            --color-blue: #0055ff;
+            --color-yellow: #ffea00;
+            --color-green: #00ff44;
+        }
+
         body {
-            background-color: #FFFFFF;
-            color: #000000;
-            overflow-x: hidden;
-            text-transform: uppercase;
+            background-color: var(--color-base);
+            color: var(--color-dark);
+            margin: 0;
+            overflow: hidden;
+            /* Anti-aliasing for stark rendering */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Brutalist Selection */
-        ::selection {
-            background-color: #FF00FF;
-            color: #FFFFFF;
+        /* Brutalist Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 12px;
+            background: var(--color-white);
+            border-left: 2px solid var(--color-dark);
         }
 
-        /* Massive Scrollbar */
-        ::-webkit-scrollbar {
-            width: 16px;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: repeating-linear-gradient(45deg,
+                    var(--color-base),
+                    var(--color-base) 2px,
+                    var(--color-white) 2px,
+                    var(--color-white) 4px);
         }
 
-        @media (min-width: 768px) {
-            ::-webkit-scrollbar {
-                width: 24px;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--color-dark);
+            border: 2px solid var(--color-white);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--color-red);
+        }
+
+        /* Hide scrollbar for nav */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* View Switching Logic */
+        .view-section {
+            display: none;
+            opacity: 0;
+            /* Harsh snap animation */
+            animation: snapIn 0.2s cubic-bezier(0, 0, 0, 1) forwards;
+        }
+
+        .view-section.active {
+            display: flex;
+        }
+
+        @keyframes snapIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
             }
         }
 
-        ::-webkit-scrollbar-track {
-            border-left: 4px solid #000;
-            background: #DFFF00;
+        /* Nav Active State */
+        .nav-btn.active {
+            background-color: var(--color-dark);
+            color: var(--color-white);
+            box-shadow: 4px 4px 0px 0px var(--color-red);
+            transform: translate(-2px, -2px);
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #FF00FF;
-            border: 4px solid #000;
+        .nav-btn.active i {
+            color: var(--color-white);
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00FFFF;
-        }
-
-        /* --- MAXIMALIST BORDERS & SHADOWS --- */
-        .border-heavy {
-            border: 4px solid #000000;
-        }
-
-        @media (min-width: 768px) {
-            .border-heavy {
-                border: 6px solid #000000;
-            }
-        }
-
-        .shadow-brutal {
-            box-shadow: 8px 8px 0px #000000;
-            transition: all 0.1s steps(2);
-        }
-
-        .shadow-magenta {
-            box-shadow: 8px 8px 0px #FF00FF;
-        }
-
-        .shadow-acid {
-            box-shadow: 8px 8px 0px #DFFF00;
-        }
-
-        @media (min-width: 768px) {
-            .shadow-brutal {
-                box-shadow: 16px 16px 0px #000000;
-            }
-
-            .shadow-brutal:hover {
-                box-shadow: 4px 4px 0px #000000;
-                transform: translate(12px, 12px);
-            }
-
-            .shadow-magenta {
-                box-shadow: 16px 16px 0px #FF00FF;
-            }
-
-            .shadow-magenta:hover {
-                box-shadow: 4px 4px 0px #FF00FF;
-                transform: translate(12px, 12px);
-            }
-
-            .shadow-acid {
-                box-shadow: 16px 16px 0px #DFFF00;
-            }
-
-            .shadow-acid:hover {
-                box-shadow: 4px 4px 0px #DFFF00;
-                transform: translate(12px, 12px);
-            }
-        }
-
-        /* --- ANIMATIONS --- */
-        .marquee-wrap {
+        /* Brutalist Marquee */
+        .marquee-container {
             overflow: hidden;
             white-space: nowrap;
-            display: flex;
-            width: 100vw;
-            border-top: 4px solid #000;
-            border-bottom: 4px solid #000;
+            width: 100%;
+            border-top: 4px solid var(--color-dark);
+            border-bottom: 4px solid var(--color-dark);
+            background: var(--color-yellow);
         }
 
-        @media (min-width: 768px) {
-            .marquee-wrap {
-                border-top-width: 6px;
-                border-bottom-width: 6px;
-            }
-        }
-
-        .marquee {
+        .marquee-content {
             display: inline-block;
-            animation: marquee 10s linear infinite;
-            padding-right: 1rem;
-        }
-
-        .marquee-reverse {
-            animation: marquee-rev 12s linear infinite;
+            animation: marquee 15s linear infinite;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #111111;
+            /* Keep text explicitly dark for readability on yellow */
         }
 
         @keyframes marquee {
@@ -159,668 +182,882 @@
             }
 
             100% {
-                transform: translateX(-100%);
+                transform: translateX(-50%);
             }
         }
 
-        @keyframes marquee-rev {
-            0% {
-                transform: translateX(-100%);
-            }
-
-            100% {
-                transform: translateX(0);
-            }
+        /* Modal Overlay */
+        .modal-overlay {
+            background-color: color-mix(in srgb, var(--color-base) 90%, transparent);
+            backdrop-filter: grayscale(100%) contrast(150%);
         }
 
-        .spin-chaos {
-            animation: spin 8s linear infinite;
-            display: inline-block;
+        /* Loader Animation */
+        #loader {
+            transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1);
         }
 
-        @keyframes spin {
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .blink {
-            animation: blink 0.5s step-end infinite;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-
-        .glitch-bg:hover,
-        #mobile-menu-overlay .glitch-bg,
-        #admin-dashboard .glitch-bg {
-            background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #FFF 25%, #FFF 75%, #000 75%, #000);
-            background-position: 0 0, 10px 10px;
-            background-size: 20px 20px;
-            color: #DFFF00;
-        }
-
-        /* --- STARTUP SEQUENCE --- */
-        #boot-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background-color: #000;
-            color: #DFFF00;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.4s steps(4);
-        }
-
-        #boot-screen.crash {
+        #loader.slide-up {
             transform: translateY(-100%);
         }
 
-        .boot-text {
-            font-size: clamp(4rem, 25vw, 12rem);
-            line-height: 0.8;
-            text-shadow: 5px 5px 0 #FF00FF, -5px -5px 0 #00FFFF;
-        }
-
-        @media (min-width: 768px) {
-            .boot-text {
-                text-shadow: 10px 10px 0 #FF00FF, -10px -10px 0 #00FFFF;
-            }
-        }
-
-        /* --- RESPONSIVE HOVER REVEAL IMAGES --- */
-        @media (hover: hover) and (pointer: fine) {
-            .hover-img {
-                position: absolute;
-                width: 350px;
-                aspect-ratio: 1/1;
-                object-fit: cover;
-                border: 8px solid #000;
-                box-shadow: 16px 16px 0 #00FFFF;
-                opacity: 0;
-                pointer-events: none;
-                transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
-                transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                z-index: 100;
-                filter: grayscale(100%) contrast(200%);
+        @keyframes fillBar {
+            0% {
+                width: 0%;
             }
 
-            .work-row:hover .hover-img {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1) rotate(5deg);
-                filter: grayscale(0%) contrast(120%);
+            20% {
+                width: 10%;
             }
-        }
 
-        @media (hover: none),
-        (pointer: coarse) {
-            .hover-img {
-                position: relative;
+            40% {
+                width: 40%;
+            }
+
+            60% {
+                width: 45%;
+            }
+
+            80% {
+                width: 90%;
+            }
+
+            100% {
                 width: 100%;
-                max-width: 280px;
-                aspect-ratio: 1/1;
-                object-fit: cover;
-                border: 4px solid #000;
-                box-shadow: 8px 8px 0 #00FFFF;
-                margin-top: 1.5rem;
-                opacity: 1;
-                filter: grayscale(100%) contrast(150%);
-                transform: rotate(-2deg);
-                transition: filter 0.3s;
-            }
-
-            .work-row:active .hover-img {
-                filter: grayscale(0%) contrast(100%);
-                transform: rotate(0deg);
             }
         }
 
-        /* Chaotic Cursor */
-        @media (hover: hover) {
-            body {
-                cursor: crosshair;
-            }
-
-            a,
-            button,
-            input,
-            textarea {
-                cursor: cell;
-            }
+        .animate-fillBar {
+            animation: fillBar 1.8s ease-in-out forwards;
         }
     </style>
 </head>
 
-<body class="font-mono bg-paper text-ink overflow-hidden">
+<body class="font-sans transition-colors duration-200">
 
-    <!-- FEEDBACK MODAL (BRUTALIST) -->
+    <!-- Opening Animation / Boot Sequence -->
+    <div id="loader"
+        class="fixed inset-0 z-[999] bg-dark text-white flex flex-col items-center justify-center font-mono">
+        <h1 class="text-3xl md:text-6xl font-bold uppercase tracking-widest mb-2 text-brutalYellow">SYS_BOOT</h1>
+        <p class="mb-8 text-sm md:text-base text-gray-400">LOADING PROVOCATEUR PROTOCOLS...</p>
+        <div class="w-64 md:w-96 h-6 bg-dark border-4 border-white p-1 relative">
+            <div class="h-full bg-white w-0 animate-fillBar"></div>
+        </div>
+        <p id="loader-status" class="mt-4 text-xs tracking-widest">INITIALIZING...</p>
+    </div>
+
+    <!-- Full Screen App Container -->
+    <div class="w-full h-[100dvh] bg-base flex flex-col md:flex-row relative">
+
+        <!-- Sidebar Navigation (Bottom Nav on Mobile) -->
+        <nav
+            class="w-full h-20 md:w-24 md:h-full flex flex-row md:flex-col items-center justify-around md:justify-start md:py-8 px-4 md:px-0 md:gap-8 shrink-0 bg-white border-t-4 md:border-t-0 md:border-r-4 border-dark z-50 order-last md:order-first pb-safe relative">
+
+            <!-- Grid overlay for visual texture -->
+            <div class="absolute inset-0 pointer-events-none opacity-5"
+                style="background-image: linear-gradient(var(--color-dark) 1px, transparent 1px), linear-gradient(90deg, var(--color-dark) 1px, transparent 1px); background-size: 20px 20px;">
+            </div>
+
+            <!-- Logo (M) - Hidden on mobile nav -->
+            <div
+                class="hidden md:flex w-14 h-14 bg-brutalRed border-4 border-dark items-center justify-center text-white mb-4 font-black text-4xl shadow-brutal-sm relative z-10">
+                M.
+            </div>
+
+            <!-- Nav Icons -->
+            <div
+                class="flex flex-row md:flex-col gap-3 sm:gap-6 items-center flex-1 justify-around md:justify-start w-full md:w-auto z-10">
+                <button
+                    class="nav-btn active w-12 h-12 md:w-14 md:h-14 border-4 border-dark bg-white flex items-center justify-center text-dark hover:bg-brutalYellow transition-all"
+                    data-target="view-overview" title="Overview">
+                    <i class="ph-bold ph-house text-2xl transition-colors"></i>
+                </button>
+                <button
+                    class="nav-btn w-12 h-12 md:w-14 md:h-14 border-4 border-dark bg-white flex items-center justify-center text-dark hover:bg-brutalYellow transition-all"
+                    data-target="view-archive" title="Archive">
+                    <i class="ph-bold ph-folder-open text-2xl transition-colors"></i>
+                </button>
+                <button
+                    class="nav-btn w-12 h-12 md:w-14 md:h-14 border-4 border-dark bg-white flex items-center justify-center text-dark hover:bg-brutalYellow transition-all"
+                    data-target="view-gallery" title="Gallery">
+                    <i class="ph-bold ph-squares-four text-2xl transition-colors"></i>
+                </button>
+                <button
+                    class="nav-btn w-12 h-12 md:w-14 md:h-14 border-4 border-dark bg-white flex items-center justify-center text-dark hover:bg-brutalYellow transition-all"
+                    data-target="view-arsenal" title="Arsenal">
+                    <i class="ph-bold ph-pen-nib text-2xl transition-colors"></i>
+                </button>
+                <button
+                    class="nav-btn w-12 h-12 md:w-14 md:h-14 border-4 border-dark bg-white flex items-center justify-center text-dark hover:bg-brutalYellow transition-all relative"
+                    data-target="view-contact" title="Messages & Contact">
+                    <i class="ph-bold ph-chat-centered-text text-2xl transition-colors"></i>
+                    <span class="absolute -top-2 -right-2 w-4 h-4 bg-brutalRed border-2 border-dark"></span>
+                </button>
+            </div>
+
+            <!-- Add Button (Hire / Contact Shortcut) -->
+            <button
+                class="nav-btn hidden sm:flex w-14 h-14 border-4 border-dark bg-brutalBlue items-center justify-center text-white shadow-brutal-sm hover:translate-x-1 hover:-translate-y-1 transition-transform z-10"
+                data-target="view-contact" title="Initiate Contact">
+                <i class="ph-bold ph-paper-plane-tilt text-2xl"></i>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-hidden w-full relative z-10">
+
+            <!-- Brutalist Marquee Header -->
+            <div class="marquee-container hidden md:block shrink-0 z-20">
+                <div class="marquee-content py-2 text-sm">
+                    WARNING: REJECTING STERILE CORPORATE AESTHETICS &nbsp;&nbsp; // &nbsp;&nbsp; ENGINEERING RAW BRAND
+                    IDENTITIES &nbsp;&nbsp; // &nbsp;&nbsp; ACCEPTING NEW MISSIONS &nbsp;&nbsp; // &nbsp;&nbsp; WARNING:
+                    REJECTING STERILE CORPORATE AESTHETICS &nbsp;&nbsp; // &nbsp;&nbsp; ENGINEERING RAW BRAND IDENTITIES
+                    &nbsp;&nbsp; // &nbsp;&nbsp; ACCEPTING NEW MISSIONS &nbsp;&nbsp; // &nbsp;&nbsp;
+                </div>
+            </div>
+
+            <!-- Top Header -->
+            <header class="flex justify-between items-center px-6 md:px-10 pt-6 md:pt-8 mb-6 shrink-0 relative z-20">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile Logo -->
+                    <div
+                        class="flex md:hidden w-12 h-12 bg-brutalRed border-4 border-dark items-center justify-center text-white font-black text-3xl shadow-brutal-sm">
+                        M.
+                    </div>
+                    <div>
+                        <span
+                            class="text-xs font-mono font-bold uppercase block -mb-1 text-gray-500 hidden sm:block">STATUS:
+                            ONLINE</span>
+                        <h1 class="text-2xl md:text-4xl font-black uppercase tracking-tighter text-dark">
+                            MITHIL ASTIK
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Theme Toggle Btn -->
+                    <button id="theme-toggle"
+                        class="relative w-12 h-12 bg-white border-4 border-dark shadow-brutal-sm hover:translate-x-1 hover:-translate-y-1 hover:bg-brutalYellow transition-all flex items-center justify-center text-dark"
+                        title="Toggle Theme">
+                        <i id="theme-icon" class="ph-bold ph-moon text-xl"></i>
+                    </button>
+
+                    <!-- System Admin Btn -->
+                    <button
+                        class="admin-open-btn relative w-12 h-12 bg-white border-4 border-dark shadow-brutal-sm hover:translate-x-1 hover:-translate-y-1 hover:bg-brutalGreen transition-all flex items-center justify-center text-dark"
+                        title="System Admin">
+                        <i class="ph-bold ph-terminal-window text-xl"></i>
+                        <span class="absolute -top-2 -right-2 w-3 h-3 bg-brutalRed border-2 border-dark"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Views Container -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-10 pb-10 relative z-10">
+
+                <!-- ================= VIEW: OVERVIEW ================= -->
+                <div id="view-overview" class="view-section active flex-col gap-8 md:gap-12">
+
+                    <!-- Row 1: Hero & Right Cards -->
+                    <div class="flex flex-col xl:flex-row gap-8 shrink-0">
+
+                        <!-- Hero Card -->
+                        <div
+                            class="flex-1 xl:flex-[1.6] bg-brutalRed border-4 border-dark p-8 md:p-12 relative shadow-brutal min-h-[350px] flex flex-col justify-between overflow-hidden group">
+                            <!-- Background Texture Image (Harsh Blend) -->
+                            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop"
+                                class="absolute right-0 top-0 h-full w-[60%] object-cover object-left mix-blend-color-burn opacity-70 grayscale group-hover:grayscale-0 transition-all duration-700 pointer-events-none"
+                                alt="Abstract Background">
+
+                            <!-- Content -->
+                            <div class="relative z-10 w-full md:w-[70%] flex flex-col h-full justify-between gap-6">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="bg-brutalYellow text-dark border-2 border-dark px-4 py-1 flex items-center gap-2 text-xs font-mono font-bold shadow-brutal-sm uppercase">
+                                        <span class="w-2 h-2 bg-brutalRed rounded-full animate-ping"></span> Available
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2 class="text-5xl md:text-6xl lg:text-7xl font-black mb-4 tracking-tighter uppercase text-white"
+                                        style="-webkit-text-stroke: 2px var(--color-dark);">
+                                        PROVOCATEUR.
+                                    </h2>
+                                    <p
+                                        class="text-base md:text-lg text-dark font-medium leading-tight mb-8 max-w-md bg-white p-3 border-2 border-dark shadow-brutal-sm">
+                                        Rejecting sterile corporate aesthetics. Engineering raw, unapologetic brand
+                                        identities, editorial layouts, and campaigns that scream.
+                                    </p>
+                                    <div class="flex flex-wrap items-center gap-4">
+                                        <button
+                                            class="bg-dark text-white border-2 border-dark px-6 py-3 text-sm font-bold font-mono uppercase flex items-center gap-2 hover:bg-white hover:text-dark transition shadow-brutal-sm">
+                                            <i class="ph-bold ph-thumbs-up text-brutalYellow"></i> +12 Endorsements
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Side Cards List -->
+                        <div class="w-full xl:w-2/5 flex flex-col gap-5">
+                            <div class="text-xl font-black uppercase border-b-4 border-dark pb-2 text-dark">Recent Logs
+                            </div>
+
+                            <div class="nav-btn bg-white border-4 border-dark shadow-brutal-sm hover:shadow-brutal hover:-translate-y-1 hover:translate-x-1 transition-all p-4 flex items-center justify-between cursor-pointer"
+                                data-target="view-archive">
+                                <div class="flex items-center gap-4">
+                                    <img src="https://images.unsplash.com/photo-1600626337651-789f2144bd46?q=80&w=100&auto=format&fit=crop"
+                                        class="w-16 h-16 border-2 border-dark grayscale object-cover"
+                                        alt="Esports Club">
+                                    <div class="flex flex-col text-left">
+                                        <span class="text-lg font-bold text-dark uppercase leading-none mb-1">Esports
+                                            Club</span>
+                                        <span
+                                            class="text-xs text-dark font-mono bg-brutalYellow px-2 border border-dark w-max">Complete
+                                            Identity</span>
+                                    </div>
+                                </div>
+                                <i class="ph-bold ph-arrow-right text-dark text-2xl"></i>
+                            </div>
+
+                            <div class="nav-btn bg-white border-4 border-dark shadow-brutal-sm hover:shadow-brutal hover:-translate-y-1 hover:translate-x-1 transition-all p-4 flex items-center justify-between cursor-pointer"
+                                data-target="view-archive">
+                                <div class="flex items-center gap-4">
+                                    <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=100&auto=format&fit=crop"
+                                        class="w-16 h-16 border-2 border-dark grayscale object-cover" alt="ATMoS 25">
+                                    <div class="flex flex-col text-left">
+                                        <span class="text-lg font-bold text-dark uppercase leading-none mb-1">ATMoS
+                                            '25</span>
+                                        <span
+                                            class="text-xs text-white font-mono bg-brutalRed px-2 border border-dark w-max">Editorial
+                                            & Print</span>
+                                    </div>
+                                </div>
+                                <i class="ph-bold ph-arrow-right text-dark text-2xl"></i>
+                            </div>
+
+                            <div class="nav-btn bg-white border-4 border-dark shadow-brutal-sm hover:shadow-brutal hover:-translate-y-1 hover:translate-x-1 transition-all p-4 flex items-center justify-between cursor-pointer"
+                                data-target="view-gallery">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-16 h-16 bg-brutalBlue border-2 border-dark flex items-center justify-center text-white">
+                                        <i class="ph-bold ph-layout text-3xl"></i>
+                                    </div>
+                                    <div class="flex flex-col text-left">
+                                        <span class="text-lg font-bold text-dark uppercase leading-none mb-1">System
+                                            Overload</span>
+                                        <span
+                                            class="text-xs text-dark font-mono bg-brutalGreen px-2 border border-dark w-max">UI/UX
+                                            Interface</span>
+                                    </div>
+                                </div>
+                                <i class="ph-bold ph-arrow-right text-dark text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Capabilities, Status, Statistic -->
+                    <div class="flex flex-col xl:flex-row gap-8 shrink-0">
+                        <!-- Left Column -->
+                        <div class="flex-1 xl:flex-[1.6] flex flex-col gap-8">
+
+                            <!-- Core Capabilities -->
+                            <div class="flex flex-col gap-4">
+                                <div class="flex justify-between items-end border-b-4 border-dark pb-2 text-dark">
+                                    <h3 class="text-2xl font-black uppercase">Capabilities</h3>
+                                    <button
+                                        class="nav-btn font-mono text-sm font-bold uppercase underline hover:bg-dark hover:text-white px-2 transition"
+                                        data-target="view-arsenal">View_Arsenal</button>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                    <!-- Box 1 -->
+                                    <div
+                                        class="bg-white border-4 border-dark shadow-brutal p-6 flex flex-col justify-between min-h-[160px] relative text-dark">
+                                        <div
+                                            class="w-12 h-12 bg-brutalRed border-2 border-dark flex items-center justify-center text-white mb-4 shadow-brutal-sm">
+                                            <i class="ph-bold ph-bezier-curve text-2xl"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black text-lg uppercase leading-none mb-2">Brand Identity
+                                            </h4>
+                                            <p class="text-sm font-mono leading-tight">Logos and systems that hit like a
+                                                flashbang.</p>
+                                        </div>
+                                    </div>
+                                    <!-- Box 2 -->
+                                    <div
+                                        class="bg-dark border-4 border-dark shadow-brutal p-6 flex flex-col justify-between min-h-[160px] relative group overflow-hidden">
+                                        <img src="https://images.unsplash.com/photo-1600132806370-bf17e65e942f?q=80&w=400&auto=format&fit=crop"
+                                            class="absolute inset-0 w-full h-full object-cover opacity-40 grayscale group-hover:grayscale-0 transition-all z-0"
+                                            alt="Editorial">
+                                        <div
+                                            class="w-12 h-12 bg-brutalYellow border-2 border-dark flex items-center justify-center text-dark mb-4 shadow-brutal-sm relative z-10">
+                                            <i class="ph-bold ph-book-open text-2xl"></i>
+                                        </div>
+                                        <div class="relative z-10">
+                                            <h4 class="font-black text-lg uppercase text-white leading-none mb-2">
+                                                Editorial/Print</h4>
+                                        </div>
+                                    </div>
+                                    <!-- Box 3 -->
+                                    <div
+                                        class="bg-brutalBlue text-white border-4 border-dark shadow-brutal p-6 flex flex-col items-center justify-center min-h-[160px] text-center">
+                                        <i class="ph-bold ph-desktop text-5xl mb-3"></i>
+                                        <h4
+                                            class="font-black text-xl uppercase tracking-widest bg-dark px-2 border-2 border-white">
+                                            UI/UX</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Current Status -->
+                            <div class="flex flex-col gap-4 mt-auto">
+                                <div
+                                    class="bg-brutalYellow border-4 border-dark shadow-brutal p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                                    <div class="flex items-center gap-4 text-dark">
+                                        <div
+                                            class="w-16 h-16 bg-white border-4 border-dark flex items-center justify-center font-black text-sm flex-col shadow-brutal-sm">
+                                            <i class="ph-bold ph-briefcase text-2xl"></i>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="font-black text-2xl uppercase leading-none">Available</span>
+                                            <span
+                                                class="text-sm font-mono font-bold mt-1 bg-dark text-white px-2 w-max">Accepting
+                                                Missions</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        class="nav-btn bg-dark text-white border-4 border-dark shadow-brutal hover:bg-white hover:text-dark px-6 py-4 font-bold uppercase text-lg flex items-center gap-3 transition-all"
+                                        data-target="view-contact">
+                                        Initiate <i class="ph-bold ph-paper-plane-tilt text-2xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Design Statistic -->
+                        <div class="w-full xl:w-2/5 flex flex-col shrink-0 gap-4">
+                            <div class="text-2xl font-black uppercase border-b-4 border-dark pb-2 text-dark">Metrics
+                            </div>
+
+                            <div
+                                class="flex-1 bg-white border-4 border-dark shadow-brutal p-8 flex flex-col relative min-h-[300px]">
+                                <!-- Grid background -->
+                                <div class="absolute inset-0 pointer-events-none opacity-10"
+                                    style="background-image: linear-gradient(var(--color-dark) 2px, transparent 2px), linear-gradient(90deg, var(--color-dark) 2px, transparent 2px); background-size: 30px 30px;">
+                                </div>
+
+                                <div class="flex-1 flex items-center justify-center z-10 pb-6 border-b-4 border-dark">
+                                    <div class="text-center text-dark">
+                                        <span
+                                            class="text-sm font-mono font-bold tracking-widest uppercase bg-brutalGreen text-dark px-2 border-2 border-dark">Hours_Logged</span>
+                                        <span class="block text-6xl md:text-7xl font-black mt-2 tracking-tighter"
+                                            style="-webkit-text-stroke: 1px var(--color-dark); color: transparent;">12,340</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-around items-end z-10 pt-6 text-dark">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div
+                                            class="w-12 h-12 border-4 border-dark bg-brutalRed flex items-center justify-center shadow-brutal-sm">
+                                            <i class="ph-bold ph-pen-nib text-2xl text-white"></i>
+                                        </div>
+                                        <span class="text-xs font-mono font-bold uppercase">Branding</span>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div
+                                            class="w-12 h-12 border-4 border-dark bg-brutalBlue flex items-center justify-center shadow-brutal-sm">
+                                            <i class="ph-bold ph-layout text-2xl text-white"></i>
+                                        </div>
+                                        <span class="text-xs font-mono font-bold uppercase">UI/UX</span>
+                                    </div>
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div
+                                            class="w-12 h-12 border-4 border-dark bg-dark flex items-center justify-center shadow-brutal-sm">
+                                            <i class="ph-bold ph-book-open text-2xl text-white"></i>
+                                        </div>
+                                        <span class="text-xs font-mono font-bold uppercase">Editorial</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= VIEW: ARCHIVE (Projects) ================= -->
+                <div id="view-archive" class="view-section flex-col gap-8 h-full">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between sm:items-end border-b-4 border-dark pb-4 gap-4 text-dark">
+                        <h2 class="text-5xl font-black uppercase tracking-tighter">Mission Archive</h2>
+                        <span id="archive-count"
+                            class="text-sm font-mono font-bold bg-dark text-white px-4 py-2 uppercase shadow-brutal-sm w-max border-2 border-dark">Loading...</span>
+                    </div>
+
+                    <div id="archive-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                        <!-- Projects populated dynamically by JS -->
+                        <div class="col-span-full flex justify-center py-20 text-dark"><i
+                                class="ph-bold ph-spinner animate-spin text-5xl"></i></div>
+                    </div>
+                </div>
+
+                <!-- ================= VIEW: GALLERY (Combined Work) ================= -->
+                <div id="view-gallery" class="view-section flex-col gap-8 h-full">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between sm:items-end border-b-4 border-dark pb-4 gap-4 text-dark">
+                        <h2 class="text-5xl font-black uppercase tracking-tighter">Visual Gallery</h2>
+                        <span
+                            class="text-sm font-mono font-bold bg-brutalGreen text-dark border-2 border-dark px-4 py-2 uppercase shadow-brutal-sm w-max">Raw
+                            Assets</span>
+                    </div>
+
+                    <!-- CSS Masonry Grid -->
+                    <div id="gallery-grid" class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+                        <!-- Gallery items populated dynamically by JS -->
+                        <div class="col-span-full flex justify-center py-20 text-dark"><i
+                                class="ph-bold ph-spinner animate-spin text-5xl"></i></div>
+                    </div>
+                </div>
+
+                <!-- ================= VIEW: ARSENAL (Tools) ================= -->
+                <div id="view-arsenal" class="view-section flex-col gap-8 h-full">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between sm:items-end border-b-4 border-dark pb-4 gap-4 text-dark">
+                        <h2 class="text-5xl font-black uppercase tracking-tighter">Arsenal</h2>
+                        <span
+                            class="text-sm font-mono font-bold bg-brutalRed text-white border-2 border-dark px-4 py-2 uppercase shadow-brutal-sm w-max">Equipped
+                            Tools</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div
+                            class="bg-white text-dark border-4 border-dark shadow-brutal p-8 flex flex-col items-center justify-center gap-6 min-h-[250px] hover:bg-brutalYellow transition-colors group">
+                            <div
+                                class="w-24 h-24 border-4 border-dark bg-[#ff9a00] text-dark flex items-center justify-center shadow-brutal-sm group-hover:scale-110 transition-transform">
+                                <i class="ph-bold ph-bezier-curve text-5xl"></i>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="font-black text-xl uppercase bg-dark text-white px-2">Illustrator</h4>
+                                <span class="text-sm font-mono font-bold mt-2 block">Vector Mastery</span>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white text-dark border-4 border-dark shadow-brutal p-8 flex flex-col items-center justify-center gap-6 min-h-[250px] hover:bg-brutalBlue hover:text-white transition-colors group">
+                            <div
+                                class="w-24 h-24 border-4 border-dark bg-[#31a8ff] text-dark flex items-center justify-center shadow-brutal-sm group-hover:scale-110 transition-transform">
+                                <i class="ph-bold ph-image text-5xl"></i>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="font-black text-xl uppercase bg-dark text-white px-2">Photoshop</h4>
+                                <span class="text-sm font-mono font-bold mt-2 block group-hover:text-white">Raster
+                                    Manip.</span>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white text-dark border-4 border-dark shadow-brutal p-8 flex flex-col items-center justify-center gap-6 min-h-[250px] hover:bg-[#ff3366] hover:text-white transition-colors group">
+                            <div
+                                class="w-24 h-24 border-4 border-dark bg-[#ff3366] text-white flex items-center justify-center shadow-brutal-sm group-hover:scale-110 transition-transform">
+                                <i class="ph-bold ph-book-open text-5xl"></i>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="font-black text-xl uppercase bg-dark text-white px-2">InDesign</h4>
+                                <span class="text-sm font-mono font-bold mt-2 block group-hover:text-white">Editorial
+                                    Layouts</span>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-white text-dark border-4 border-dark shadow-brutal p-8 flex flex-col items-center justify-center gap-6 min-h-[250px] hover:bg-brutalGreen transition-colors group">
+                            <div
+                                class="w-24 h-24 border-4 border-dark bg-[#0acf83] text-dark flex items-center justify-center shadow-brutal-sm group-hover:scale-110 transition-transform">
+                                <i class="ph-bold ph-figma-logo text-5xl"></i>
+                            </div>
+                            <div class="text-center">
+                                <h4 class="font-black text-xl uppercase bg-dark text-white px-2">Figma</h4>
+                                <span class="text-sm font-mono font-bold mt-2 block">UI/UX Interface</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= VIEW: CONTACT / MESSAGES ================= -->
+                <div id="view-contact" class="view-section flex-col gap-8 h-full">
+                    <div
+                        class="flex flex-col sm:flex-row justify-between sm:items-end border-b-4 border-dark pb-4 gap-4 text-dark">
+                        <h2 class="text-5xl font-black uppercase tracking-tighter">Communique</h2>
+                        <span
+                            class="text-sm font-mono font-bold bg-dark text-brutalYellow border-2 border-dark px-4 py-2 uppercase shadow-brutal-sm w-max">Secure
+                            Channel Open</span>
+                    </div>
+
+                    <div
+                        class="bg-white border-4 border-dark p-8 md:p-16 shadow-brutal relative max-w-5xl mx-auto w-full text-dark">
+                        <!-- Brutalist accent shapes -->
+                        <div class="absolute -top-4 -right-4 w-12 h-12 bg-brutalRed border-4 border-dark"></div>
+                        <div class="absolute -bottom-4 -left-4 w-12 h-12 bg-brutalBlue border-4 border-dark"></div>
+
+                        <div class="mb-10 relative z-10 border-b-4 border-dark pb-6">
+                            <h3 class="text-3xl md:text-5xl font-black uppercase">Initiate Contact</h3>
+                            <p
+                                class="font-mono text-sm md:text-base mt-3 bg-brutalYellow inline-block px-2 border border-dark font-bold text-dark">
+                                ENTER PARAMETERS TO ESTABLISH CONNECTION.</p>
+                        </div>
+
+                        <form id="contact-form" class="space-y-8 relative z-10">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="flex flex-col gap-2">
+                                    <label
+                                        class="text-sm font-black uppercase tracking-widest bg-dark text-white w-max px-2">Identifier
+                                        [Name]</label>
+                                    <input type="text" id="form-name" required
+                                        class="bg-base border-4 border-dark p-5 text-lg text-dark font-mono focus:bg-white focus:shadow-brutal-sm transition-all outline-none"
+                                        placeholder="GUEST_NAME">
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label
+                                        class="text-sm font-black uppercase tracking-widest bg-dark text-white w-max px-2">Return
+                                        Node [Email]</label>
+                                    <input type="email" id="form-email" required
+                                        class="bg-base border-4 border-dark p-5 text-lg text-dark font-mono focus:bg-white focus:shadow-brutal-sm transition-all outline-none"
+                                        placeholder="NODE@SYSTEM.COM">
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label
+                                    class="text-sm font-black uppercase tracking-widest bg-dark text-white w-max px-2">Objective
+                                    [Message]</label>
+                                <textarea id="form-message" rows="5" required
+                                    class="bg-base border-4 border-dark p-5 text-lg text-dark font-mono focus:bg-white focus:shadow-brutal-sm transition-all outline-none resize-none"
+                                    placeholder="DEFINE OBJECTIVE..."></textarea>
+                            </div>
+
+                            <div class="pt-4">
+                                <button type="submit" id="submit-btn"
+                                    class="w-full bg-brutalRed text-white border-4 border-dark font-black text-2xl uppercase py-6 shadow-brutal hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-active transition-all flex justify-center items-center gap-3">
+                                    <i class="ph-bold ph-terminal"></i> Execute Submission
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Right Sidebar (Social) - Hidden on Tablet/Mobile -->
+        <aside
+            class="hidden lg:flex w-24 bg-white py-8 flex-col items-center justify-between shrink-0 shadow-[-4px_0_0_0_var(--color-dark)] z-40 border-l-4 border-dark relative">
+            <!-- Grid overlay -->
+            <div class="absolute inset-0 pointer-events-none opacity-5"
+                style="background-image: linear-gradient(var(--color-dark) 1px, transparent 1px); background-size: 100% 20px;">
+            </div>
+
+            <!-- User Info Top -->
+            <div class="flex flex-col items-center gap-8 w-full z-10">
+                <div class="relative cursor-pointer border-4 border-dark shadow-brutal-sm hover:-translate-y-1 hover:translate-x-1 transition-transform bg-white"
+                    title="Mithil Astik">
+                    <img src="https://images.prismic.io/smi-blog/6c987520-81a6-4d03-acc3-2281bbb8b323_IMG_4795.jpg?auto=compress,format"
+                        class="w-12 h-12 object-cover grayscale">
+                    <span class="absolute -bottom-2 -right-2 w-4 h-4 bg-brutalGreen border-2 border-dark"
+                        title="Online"></span>
+                </div>
+
+                <div class="w-10 h-1 bg-dark"></div>
+
+                <!-- Social Links -->
+                <div class="flex flex-col gap-6 items-center">
+                    <div class="text-xs font-mono font-bold rotate-90 uppercase tracking-widest my-6 text-dark">Networks
+                    </div>
+
+                    <a href="#"
+                        class="w-12 h-12 border-4 border-dark bg-white text-dark hover:bg-brutalBlue hover:text-white flex items-center justify-center transition shadow-brutal-sm hover:-translate-y-1 hover:translate-x-1 text-2xl">
+                        <i class="ph-bold ph-behance-logo"></i>
+                    </a>
+
+                    <a href="https://www.linkedin.com/in/mithil-astik" target="_blank"
+                        class="w-12 h-12 border-4 border-dark bg-white text-dark hover:bg-brutalBlue hover:text-white flex items-center justify-center transition shadow-brutal-sm hover:-translate-y-1 hover:translate-x-1 text-2xl">
+                        <i class="ph-bold ph-linkedin-logo"></i>
+                    </a>
+
+                    <a href="https://www.instagram.com/lihtimkitsa/" target="_blank"
+                        class="w-12 h-12 border-4 border-dark bg-white text-dark hover:bg-brutalRed hover:text-white flex items-center justify-center transition shadow-brutal-sm hover:-translate-y-1 hover:translate-x-1 text-2xl">
+                        <i class="ph-bold ph-instagram-logo"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- ================= NOTIFICATION TOAST ================= -->
     <div id="status-overlay"
-        class="fixed inset-0 z-[200] flex items-center justify-center bg-ink/80 p-4 pointer-events-none opacity-0 transition-opacity duration-300">
+        class="fixed top-8 right-4 md:right-8 z-[200] pointer-events-none opacity-0 transition-all duration-200 transform translate-x-12 w-[calc(100%-2rem)] md:w-auto">
         <div id="status-box"
-            class="max-w-xl w-full bg-alert border-heavy shadow-magenta p-8 md:p-12 transform scale-75 transition-transform duration-300">
-            <h3 id="status-title" class="font-display text-5xl md:text-7xl text-paper mb-4 leading-none break-words">
-                ERROR!</h3>
-            <p id="status-message"
-                class="font-bold text-xl md:text-2xl text-ink bg-paper p-4 border-heavy mb-8 break-words">CONNECTION
-                FAILED.</p>
+            class="bg-white border-4 border-dark p-4 shadow-brutal flex items-center gap-4 w-full md:w-80">
+            <div id="status-icon-bg"
+                class="w-12 h-12 border-2 border-dark flex items-center justify-center shrink-0 shadow-brutal-sm">
+                <i id="status-icon" class="ph-bold ph-warning-circle text-2xl"></i>
+            </div>
+            <div class="flex-grow">
+                <h3 id="status-title"
+                    class="font-black text-dark text-sm uppercase bg-brutalYellow inline-block px-1 border border-dark">
+                    Alert</h3>
+                <p id="status-message" class="text-dark font-mono text-xs mt-1 font-bold">System notification.</p>
+            </div>
             <button id="close-status"
-                class="bg-ink text-acid font-display text-3xl px-8 py-4 border-heavy hover:bg-magenta hover:text-paper transition-none w-full">ACKNOWLEDGE</button>
+                class="w-8 h-8 border-2 border-dark bg-base hover:bg-brutalRed hover:text-white flex items-center justify-center text-dark transition pointer-events-auto shadow-[2px_2px_0_0_var(--color-dark)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]">
+                <i class="ph-bold ph-x"></i>
+            </button>
         </div>
     </div>
 
-    <div id="boot-screen">
-        <div class="font-display boot-text blink" id="boot-counter">00%</div>
-        <div class="mt-8 font-bold text-xl md:text-4xl bg-magenta text-paper px-4 py-2 border-4 border-acid blink text-center mx-4"
-            style="animation-duration: 0.2s">SYSTEM OVERLOAD IN PROGRESS</div>
-        <div class="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-xs text-cyan opacity-80" id="boot-logs">
-            > INITIATING CHAOS_ENGINE.EXE...<br>
-        </div>
-    </div>
+    <!-- ================= ADMIN DASHBOARD MODAL ================= -->
+    <div id="admin-modal"
+        class="fixed inset-0 z-[300] modal-overlay hidden items-center justify-center opacity-0 transition-opacity duration-200 p-4">
 
-    <!-- MAIN INTERFACE -->
-    <div id="main-content" class="min-h-screen flex flex-col relative opacity-0 transition-opacity duration-700">
-
-        <div
-            class="fixed top-24 right-10 z-50 w-32 h-32 bg-acid rounded-full border-heavy flex items-center justify-center shadow-magenta pointer-events-none mix-blend-difference hidden md:flex">
-            <span class="font-display text-4xl text-ink text-center leading-none spin-chaos">100%<br>RAW</span>
-        </div>
-        <div
-            class="fixed bottom-10 left-10 z-50 bg-cyan border-heavy px-4 py-2 transform -rotate-12 shadow-brutal pointer-events-none hidden lg:block">
-            <span class="font-display text-3xl text-ink">NO ROUNDED CORNERS</span>
-        </div>
-
-        <header
-            class="border-heavy border-x-0 border-t-0 bg-paper sticky top-0 z-40 flex justify-between items-stretch">
-            <div
-                class="p-4 md:p-6 border-r-[4px] md:border-r-[6px] border-ink bg-acid flex-shrink-0 flex items-center justify-center hover:bg-magenta transition-none group w-2/3 md:w-auto">
-                <a href="#hero"
-                    class="font-display text-5xl md:text-5xl lg:text-6xl tracking-tighter leading-none group-hover:text-paper text-center">MITHIL<br>ASTIK.</a>
+        <!-- Admin Login Container -->
+        <div id="admin-login-view"
+            class="bg-white border-8 border-dark p-8 md:p-12 shadow-brutal w-full max-w-md transform scale-95 transition-transform duration-200 relative">
+            <div class="text-center mb-8 border-b-4 border-dark pb-6 text-dark">
+                <div
+                    class="w-20 h-20 bg-dark text-brutalYellow border-4 border-dark flex items-center justify-center mx-auto mb-4 shadow-brutal-sm">
+                    <i class="ph-bold ph-lock-key text-4xl"></i>
+                </div>
+                <h3 class="text-3xl font-black uppercase">SYS_ADMIN</h3>
+                <p
+                    class="font-mono text-sm font-bold bg-brutalRed text-white inline-block px-2 mt-2 border border-dark">
+                    AUTH_REQUIRED</p>
             </div>
-
-            <button id="mobile-menu-trigger"
-                class="w-1/3 md:hidden font-display text-3xl bg-ink text-acid flex items-center justify-center border-none hover:bg-alert hover:text-paper transition-none blink"
-                style="animation-duration: 2s;">
-                [ NAV ]
+            <form id="admin-login-form" class="space-y-6">
+                <div class="flex flex-col gap-2">
+                    <input type="password" id="admin-password" required
+                        class="bg-base border-4 border-dark p-4 text-dark text-center tracking-[0.5em] font-mono focus:outline-none focus:bg-brutalYellow transition-colors shadow-inner text-xl"
+                        placeholder="••••••••">
+                </div>
+                <button type="submit" id="admin-login-submit"
+                    class="w-full bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-active transition-all">
+                    Unlock System
+                </button>
+            </form>
+            <button
+                class="admin-close-btn absolute top-4 right-4 w-10 h-10 border-2 border-dark bg-white text-dark hover:bg-brutalRed hover:text-white flex items-center justify-center shadow-[2px_2px_0_0_var(--color-dark)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
+                <i class="ph-bold ph-x text-xl"></i>
             </button>
-
-            <nav class="hidden md:flex flex-grow w-full">
-                <a href="#manifesto"
-                    class="flex-1 border-r-[6px] border-ink flex items-center justify-center p-4 font-bold text-2xl hover:bg-ink hover:text-acid transition-none">THEORY</a>
-                <a href="#works"
-                    class="flex-1 border-r-[6px] border-ink flex items-center justify-center p-4 font-bold text-2xl hover:bg-ink hover:text-cyan transition-none">ARCHIVE</a>
-                <a href="#arsenal"
-                    class="flex-1 border-r-[6px] border-ink flex items-center justify-center p-4 font-bold text-2xl hover:bg-ink hover:text-magenta transition-none">TOOLS</a>
-                <a href="#contact"
-                    class="flex-1 flex items-center justify-center p-4 font-bold text-2xl bg-alert text-paper hover:bg-ink transition-none blink"
-                    style="animation-duration: 1.5s;">HIRE NOW</a>
-            </nav>
-        </header>
-
-        <div id="mobile-menu-overlay"
-            class="fixed inset-0 z-[100] bg-magenta border-heavy flex flex-col pointer-events-none transform -translate-y-full"
-            style="transition: transform 0.25s steps(4, end);">
-            <button id="close-menu-btn"
-                class="w-full border-b-[4px] border-ink p-6 bg-acid text-ink font-display text-5xl text-left hover:bg-ink hover:text-acid transition-none">
-                [X] ABORT
-            </button>
-            <nav class="flex flex-col flex-grow p-4 gap-4 overflow-y-auto bg-cyan glitch-bg">
-                <a href="#manifesto"
-                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">01.
-                    THEORY</a>
-                <a href="#works"
-                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">02.
-                    ARCHIVE</a>
-                <a href="#arsenal"
-                    class="mobile-nav-link block bg-paper border-heavy p-6 font-display text-6xl text-ink shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none">03.
-                    TOOLS</a>
-                <a href="#contact"
-                    class="mobile-nav-link block bg-alert border-heavy p-6 font-display text-6xl text-paper shadow-brutal active:translate-x-2 active:translate-y-2 active:shadow-none transition-none blink mt-auto"
-                    style="animation-duration: 0.5s;">+ HIRE NOW</a>
-            </nav>
         </div>
 
-        <div class="marquee-wrap bg-ink text-paper text-xl md:text-4xl font-display py-2">
-            <div class="marquee flex-shrink-0">VISUAL AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// VISUAL
-                AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// </div>
-            <div class="marquee flex-shrink-0">VISUAL AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// VISUAL
-                AGGRESSION /// BREAK THE GRID /// REJECT MINIMALISM /// </div>
-        </div>
-
-        <!-- HERO SECTION -->
-        <section id="hero"
-            class="relative min-h-[70vh] md:min-h-[80vh] border-heavy border-x-0 border-t-0 bg-cyan flex flex-col justify-center overflow-hidden py-16 md:py-0">
+        <!-- Admin Content Container -->
+        <div id="admin-content-view"
+            class="hidden bg-base border-8 border-dark flex-col shadow-brutal w-full max-w-5xl h-[90vh] md:h-[85vh] transform scale-95 transition-transform duration-200 overflow-hidden relative">
+            <!-- Header -->
             <div
-                class="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none overflow-hidden">
-                <h1
-                    class="font-display text-[60vw] md:text-[40vw] leading-none text-ink text-center transform rotate-[-5deg] scale-150">
-                    LOUD</h1>
-            </div>
-
-            <div class="relative z-10 px-4 md:px-12 w-full max-w-[1600px] mx-auto">
-                <div
-                    class="bg-paper border-heavy p-4 sm:p-6 md:p-12 shadow-brutal inline-block transform rotate-2 hover:rotate-0 transition-transform">
-                    <span
-                        class="bg-ink text-acid font-bold px-3 py-1 md:px-4 md:py-2 text-sm md:text-xl inline-block mb-4 md:mb-6 shadow-magenta">GRAPHIC
-                        DESIGNER / PROVOCATEUR</span>
-                    <h2 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[10rem] leading-[0.9] md:leading-[0.8] tracking-tight uppercase text-ink"
-                        style="-webkit-text-stroke: 2px #000; color: #FFF;">
-                        I DESIGN<br>
-                        <span class="text-magenta" style="-webkit-text-stroke: 0px;">FOR IMPACT.</span><br>
-                        NOT FOR<br>
-                        APPROVAL.
-                    </h2>
-                </div>
-
-                <div
-                    class="mt-8 md:mt-24 max-w-2xl ml-auto bg-acid border-heavy p-4 sm:p-6 md:p-8 shadow-brutal transform -rotate-1">
-                    <p class="font-bold text-lg md:text-3xl leading-tight">
-                        Rejecting sterile corporate aesthetics. Engineering raw, unapologetic brand identities,
-                        editorial layouts, and print campaigns that scream.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- MANIFESTO -->
-        <section id="manifesto"
-            class="border-heavy border-x-0 border-t-0 bg-ink text-paper py-16 md:py-20 px-4 md:px-12 relative">
-            <div class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0">
-                <div class="lg:col-span-5 relative z-10">
-                    <h2 class="font-display text-6xl sm:text-7xl md:text-9xl text-acid leading-none mb-4 md:mb-6">
-                        ANTI<br>BORING.</h2>
-                    <div class="w-full h-4 md:h-6 bg-magenta border-y-2 md:border-y-4 border-paper mb-6 md:mb-8"></div>
-                    <p class="text-lg md:text-2xl font-bold leading-relaxed max-w-lg">
-                        Design is not meant to be invisible. It is meant to grab you by the throat. I leverage clashing
-                        palettes, brutal grids, and massive typography to ensure your message is impossible to ignore.
-                    </p>
-                </div>
-
-                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 relative z-10">
+                class="flex flex-col sm:flex-row justify-between items-center p-6 border-b-4 border-dark bg-white gap-6">
+                <div class="flex items-center gap-4 w-full sm:w-auto text-dark">
                     <div
-                        class="bg-paper border-heavy border-paper text-ink p-6 md:p-8 hover:bg-magenta hover:border-magenta hover:text-paper shadow-[8px_8px_0_#DFFF00] md:shadow-[12px_12px_0_#DFFF00] transition-none group">
-                        <h3
-                            class="font-display text-4xl md:text-5xl mb-3 md:mb-4 border-b-[4px] border-current pb-2 group-hover:pl-4 transition-all">
-                            01. BRANDING</h3>
-                        <p class="font-bold text-base md:text-lg">Visceral identity systems. Logos that feel like
-                            warnings. Branding that refuses to blend in.</p>
+                        class="w-14 h-14 bg-brutalBlue border-4 border-dark text-white flex items-center justify-center shrink-0 shadow-brutal-sm">
+                        <i class="ph-bold ph-terminal-window text-2xl"></i>
                     </div>
-                    <div
-                        class="bg-paper border-heavy border-paper text-ink p-6 md:p-8 hover:bg-cyan hover:border-cyan hover:text-ink shadow-[8px_8px_0_#FF00FF] md:shadow-[12px_12px_0_#FF00FF] transition-none group mt-0 sm:mt-12">
-                        <h3
-                            class="font-display text-4xl md:text-5xl mb-3 md:mb-4 border-b-[4px] border-current pb-2 group-hover:pl-4 transition-all">
-                            02. PRINT</h3>
-                        <p class="font-bold text-base md:text-lg">Posters, packaging, and editorial layouts that abuse
-                            CMYK and demand physical attention.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="absolute right-0 top-0 w-1/2 h-full bg-paper mix-blend-difference pointer-events-none hidden lg:block"
-                style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);"></div>
-        </section>
-
-        <!-- WORKS -->
-        <section id="works" class="border-heavy border-x-0 border-t-0 bg-paper py-16 md:py-24 relative z-20">
-            <div
-                class="px-4 md:px-12 mb-10 md:mb-16 flex flex-col md:flex-row justify-between md:items-end gap-4 md:gap-6">
-                <h2
-                    class="font-display text-6xl sm:text-8xl md:text-[9rem] leading-none tracking-tighter shadow-[6px_6px_0_#00FFFF] md:shadow-[8px_8px_0_#00FFFF] bg-acid inline-block px-4 border-heavy">
-                    THE ARCHIVE</h2>
-                <div
-                    class="bg-ink text-paper font-bold px-4 py-2 md:px-6 md:py-4 text-sm sm:text-xl md:text-2xl border-heavy">
-                    WARNING: HIGH VISUAL DENSITY</div>
-            </div>
-
-            <div class="border-heavy border-x-0 border-b-0 flex flex-col relative" id="works-container">
-                <div
-                    class="hidden md:flex border-heavy border-x-0 border-t-0 bg-magenta text-ink font-bold text-2xl p-4">
-                    <div class="w-24">ID</div>
-                    <div class="flex-grow">PROJECT NOMENCLATURE</div>
-                    <div class="w-64">DISCIPLINE</div>
-                    <div class="w-32 text-right">YEAR</div>
-                </div>
-
-                <a href="#"
-                    class="work-row border-heavy border-x-0 border-t-0 p-4 sm:p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center bg-paper hover:bg-acid hover:text-ink transition-colors duration-0 relative overflow-hidden group">
-                    <div class="w-24 font-display text-3xl md:text-4xl text-alert mb-1 md:mb-0">#01</div>
-                    <div
-                        class="flex-grow font-display text-4xl sm:text-5xl md:text-7xl group-hover:pl-0 md:group-hover:pl-8 transition-all duration-200 z-10 relative">
-                        <span class="bg-paper group-hover:bg-transparent px-1 md:px-2">ESPORTS CLUB</span>
-                    </div>
-                    <div class="w-full md:w-64 flex flex-wrap gap-2 mt-3 md:mt-0 z-10 relative">
-                        <span
-                            class="border-[3px] md:border-4 border-ink px-2 py-1 font-bold text-sm md:text-lg bg-cyan">BRAND_ID</span>
-                    </div>
-                    <div
-                        class="w-32 md:text-right font-display text-2xl sm:text-3xl md:text-4xl mt-3 md:mt-0 z-10 relative">
-                        2026</div>
-                    <img src="https://images.unsplash.com/photo-1600626337651-789f2144bd46?q=80&w=800&auto=format&fit=crop"
-                        alt="Work 1" class="hover-img">
-                </a>
-
-                <a href="#"
-                    class="work-row border-heavy border-x-0 border-t-0 p-4 sm:p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center bg-paper hover:bg-cyan hover:text-ink transition-colors duration-0 relative overflow-hidden group">
-                    <div class="w-24 font-display text-3xl md:text-4xl text-alert mb-1 md:mb-0">#02</div>
-                    <div
-                        class="flex-grow font-display text-4xl sm:text-5xl md:text-7xl group-hover:pl-0 md:group-hover:pl-8 transition-all duration-200 z-10 relative">
-                        <span class="bg-paper group-hover:bg-transparent px-1 md:px-2">ATMoS '25</span>
-                    </div>
-                    <div class="w-full md:w-64 flex flex-wrap gap-2 mt-3 md:mt-0 z-10 relative">
-                        <span
-                            class="border-[3px] md:border-4 border-ink px-2 py-1 font-bold text-sm md:text-lg bg-magenta text-paper">EDITORIAL</span>
-                    </div>
-                    <div
-                        class="w-32 md:text-right font-display text-2xl sm:text-3xl md:text-4xl mt-3 md:mt-0 z-10 relative">
-                        2025</div>
-                    <img src="https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=800&auto=format&fit=crop"
-                        alt="Work 2" class="hover-img">
-                </a>
-            </div>
-        </section>
-
-        <!-- ARSENAL -->
-        <section id="arsenal"
-            class="border-heavy border-x-0 border-t-0 bg-alert py-16 md:py-24 px-4 md:px-12 relative overflow-hidden">
-            <h2
-                class="font-display text-5xl sm:text-7xl md:text-[10rem] text-paper text-center leading-none mb-10 md:mb-16 tracking-tight relative z-10 drop-shadow-[4px_4px_0_#000] md:drop-shadow-[10px_10px_0_#000]">
-                WEAPONS OF CHOICE</h2>
-            <div class="flex flex-wrap justify-center gap-3 md:gap-6 max-w-[1200px] mx-auto relative z-10">
-                <div
-                    class="bg-paper border-heavy px-4 py-2 md:px-8 md:py-4 font-display text-3xl sm:text-4xl md:text-6xl hover:bg-acid hover:scale-110 shadow-brutal transition-all cursor-crosshair">
-                    ADOBE ILLUSTRATOR</div>
-                <div
-                    class="bg-ink text-paper border-heavy px-4 py-2 md:px-8 md:py-4 font-display text-3xl sm:text-4xl md:text-6xl hover:bg-cyan hover:text-ink hover:-rotate-3 shadow-magenta transition-all cursor-crosshair">
-                    PHOTOSHOP</div>
-                <div
-                    class="bg-magenta border-heavy px-4 py-2 md:px-8 md:py-4 font-display text-3xl sm:text-4xl md:text-6xl hover:bg-paper hover:rotate-3 shadow-brutal transition-all cursor-crosshair">
-                    INDESIGN</div>
-                <div
-                    class="bg-cyan border-heavy px-4 py-2 md:px-8 md:py-4 font-display text-3xl sm:text-4xl md:text-6xl hover:bg-alert hover:text-paper hover:scale-110 shadow-brutal transition-all cursor-crosshair">
-                    FIGMA</div>
-            </div>
-            <div class="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
-                <div class="w-[150vw] h-12 md:h-24 bg-ink transform rotate-45"></div>
-                <div class="w-[150vw] h-12 md:h-24 bg-ink transform -rotate-45 absolute"></div>
-            </div>
-        </section>
-
-        <!-- CONTACT -->
-        <section id="contact" class="bg-magenta py-16 md:py-24 px-4 md:px-12 relative">
-            <div
-                class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-0 md:gap-12 bg-paper border-heavy shadow-brutal">
-                <div
-                    class="p-6 md:p-16 border-b-[4px] lg:border-b-0 lg:border-r-[6px] border-ink bg-acid glitch-bg transition-all duration-300">
-                    <h2 class="font-display text-6xl sm:text-7xl md:text-9xl leading-[0.8] mb-6 md:mb-8">
-                        SUMMON<br>THE<br>CHAOS.</h2>
-                    <p
-                        class="font-bold text-lg md:text-2xl border-l-[6px] md:border-l-8 border-ink pl-4 md:pl-6 bg-paper/90 p-3 md:p-4 border-heavy shadow-magenta transform rotate-1">
-                        Ready to break the mold? Fill out the parameters. I will execute the sequence.
-                    </p>
-                </div>
-                <div class="p-6 md:p-16 bg-paper">
-                    <form id="contact-form" class="flex flex-col gap-6 md:gap-10">
-                        <div class="flex flex-col group">
-                            <label
-                                class="font-display text-2xl md:text-3xl mb-1 md:mb-2 group-focus-within:text-magenta transition-none">ENTER
-                                IDENTIFIER [NAME]</label>
-                            <input type="text" id="form-name" required
-                                class="bg-paper border-heavy border-ink focus:border-magenta focus:bg-acid p-3 md:p-4 text-xl md:text-2xl font-bold focus:outline-none transition-none shadow-[4px_4px_0_#000] md:shadow-[8px_8px_0_#000] focus:shadow-[2px_2px_0_#000] focus:translate-x-1 focus:translate-y-1"
-                                placeholder="YOUR NAME">
+                    <div>
+                        <h2 class="text-2xl font-black uppercase leading-tight mb-2">Admin_Override</h2>
+                        <div class="flex gap-4 font-mono font-bold text-sm">
+                            <button id="tab-messages"
+                                class="bg-dark text-white px-2 border-2 border-dark">COMMS_LOG</button>
+                            <button id="tab-portfolio"
+                                class="bg-white text-dark px-2 border-2 border-dark hover:bg-brutalYellow transition-colors">ASSET_MGR</button>
                         </div>
-                        <div class="flex flex-col group">
+                    </div>
+                </div>
+                <div class="flex gap-3 shrink-0 self-end sm:self-auto text-dark">
+                    <button id="admin-refresh-btn"
+                        class="px-4 py-2 bg-brutalYellow border-4 border-dark font-black uppercase text-sm shadow-[2px_2px_0_0_var(--color-dark)] hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-sm active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center gap-2">
+                        <i class="ph-bold ph-arrows-clockwise"></i> <span class="hidden sm:inline">Sync</span>
+                    </button>
+                    <button id="admin-logout-btn"
+                        class="px-4 py-2 bg-brutalRed text-white border-4 border-dark font-black uppercase text-sm shadow-[2px_2px_0_0_var(--color-dark)] hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-sm active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center gap-2">
+                        <i class="ph-bold ph-sign-out"></i> <span class="hidden sm:inline">Logout</span>
+                    </button>
+                    <button
+                        class="admin-close-btn w-10 h-10 bg-white border-4 border-dark font-black uppercase text-sm shadow-[2px_2px_0_0_var(--color-dark)] hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-sm hover:bg-dark hover:text-white active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center justify-center">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages List Area -->
+            <div class="flex-grow overflow-y-auto custom-scrollbar p-6 bg-base" id="messages-container">
+                <!-- Populated via JS -->
+            </div>
+
+            <!-- Portfolio Manager Area -->
+            <div class="hidden flex-grow overflow-y-auto custom-scrollbar p-6 bg-base" id="portfolio-manager">
+
+                <div class="bg-white text-dark border-4 border-dark p-6 md:p-8 mb-8 shadow-brutal-sm relative">
+                    <h3 class="text-2xl font-black uppercase mb-6 flex items-center gap-3 border-b-4 border-dark pb-2">
+                        <div class="w-8 h-8 bg-brutalGreen border-2 border-dark flex items-center justify-center"><i
+                                class="ph-bold ph-plus text-white"></i></div>
+                        Upload Asset
+                    </h3>
+                    <form id="add-project-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <input type="text" id="p-title" required
+                            class="bg-base border-4 border-dark p-4 text-dark font-mono focus:bg-brutalYellow outline-none transition-colors"
+                            placeholder="TITLE [E.G., ESPORTS]">
+                        <input type="text" id="p-category" required
+                            class="bg-base border-4 border-dark p-4 text-dark font-mono focus:bg-brutalYellow outline-none transition-colors"
+                            placeholder="CATEGORY [E.G., BRANDING]">
+
+                        <div class="flex flex-col gap-2 md:col-span-2 bg-base border-4 border-dark p-4 border-dashed">
                             <label
-                                class="font-display text-2xl md:text-3xl mb-1 md:mb-2 group-focus-within:text-cyan transition-none">RETURN
-                                NODE [EMAIL]</label>
-                            <input type="email" id="form-email" required
-                                class="bg-paper border-heavy border-ink focus:border-cyan focus:bg-ink focus:text-cyan p-3 md:p-4 text-xl md:text-2xl font-bold focus:outline-none transition-none shadow-[4px_4px_0_#000] md:shadow-[8px_8px_0_#000] focus:shadow-[2px_2px_0_#000] focus:translate-x-1 focus:translate-y-1"
-                                placeholder="HELLO@WORLD.COM">
+                                class="text-sm font-black uppercase text-dark bg-brutalYellow inline-block px-2 border-2 border-dark w-max">Public
+                                Image Upload</label>
+                            <input type="file" id="p-image-file" accept="image/*" required
+                                class="w-full text-dark cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:border-4 file:border-dark file:text-sm file:font-black file:uppercase file:bg-dark file:text-white hover:file:bg-brutalRed transition-all font-mono text-sm">
                         </div>
-                        <div class="flex flex-col group">
-                            <label
-                                class="font-display text-2xl md:text-3xl mb-1 md:mb-2 group-focus-within:text-alert transition-none">DEFINE
-                                OBJECTIVE [MESSAGE]</label>
-                            <textarea rows="4" id="form-message" required
-                                class="bg-paper border-heavy border-ink focus:border-alert focus:bg-paper p-3 md:p-4 text-xl md:text-2xl font-bold focus:outline-none resize-none transition-none shadow-[4px_4px_0_#000] md:shadow-[8px_8px_0_#000] focus:shadow-[2px_2px_0_#000] focus:translate-x-1 focus:translate-y-1"
-                                placeholder="WE NEED VISUAL AGGRESSION..."></textarea>
-                        </div>
-                        <button type="submit" id="submit-btn"
-                            class="mt-2 md:mt-4 bg-ink text-acid font-display text-3xl md:text-5xl py-4 md:py-6 px-6 md:px-12 border-heavy border-ink hover:bg-alert hover:text-paper shadow-magenta hover:shadow-[2px_2px_0_#000] hover:translate-x-1 hover:translate-y-1 md:hover:translate-x-2 md:hover:translate-y-2 transition-all cursor-crosshair w-full md:w-auto self-start disabled:opacity-50 disabled:cursor-not-allowed">
-                            EXECUTE SUBMISSION &crarr;
+
+                        <input type="text" id="p-year" required
+                            class="bg-base border-4 border-dark p-4 text-dark font-mono focus:bg-brutalYellow outline-none transition-colors md:col-span-2"
+                            placeholder="YEAR [E.G., 2026]">
+
+                        <button type="submit" id="add-project-submit"
+                            class="bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-active transition-all flex justify-center items-center gap-2 md:col-span-2">
+                            <i class="ph-bold ph-upload-simple"></i> Execute Upload
                         </button>
                     </form>
                 </div>
-            </div>
-        </section>
 
-        <!-- FOOTER -->
-        <footer
-            class="border-heavy border-x-0 border-b-0 bg-ink text-paper py-10 md:py-12 px-4 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8 text-center md:text-left">
-            <div
-                class="font-display text-3xl md:text-4xl bg-acid text-ink px-4 py-2 transform -rotate-2 border-4 border-paper">
-                &copy; 2026 M.A.
-            </div>
-            <div
-                class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 md:gap-6 font-display text-2xl md:text-3xl">
-                <a href="#"
-                    class="hover:text-magenta hover:underline decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8 transition-all">BEHANCE</a>
-                <a href="https://www.instagram.com/lihtimkitsa/"
-                    class="hover:text-cyan hover:underline decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8 transition-all">INSTAGRAM</a>
-                <a href="https://www.linkedin.com/in/mithil-astik"
-                    class="hover:text-acid hover:underline decoration-4 md:decoration-8 underline-offset-4 md:underline-offset-8 transition-all">LINKEDIN</a>
-            </div>
-
-            <div class="flex flex-col md:flex-row gap-4 md:gap-8 items-center">
-                <button id="admin-open-btn"
-                    class="font-display text-2xl bg-paper text-ink border-4 border-paper px-4 py-2 hover:bg-alert hover:text-paper hover:border-alert transition-none shadow-magenta">
-                    [ SYS.ADMIN ]
-                </button>
-                <div class="font-bold text-lg md:text-xl tracking-widest text-center md:text-right border-4 border-paper p-3 md:p-4 blink w-full md:w-auto"
-                    style="animation-duration: 2s;">
-                    NO ROUNDED CORNERS.<br>EVER.
+                <h3 class="text-2xl font-black uppercase mb-6 border-b-4 border-dark pb-2 text-dark">Database Index</h3>
+                <div id="admin-projects-list" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-dark">
+                    <!-- Populated via JS -->
                 </div>
             </div>
-        </footer>
-
-    </div>
-
-    <!-- ADMIN DASHBOARD OVERLAY -->
-    <div id="admin-dashboard" class="fixed inset-0 z-[300] bg-ink text-paper flex-col hidden overflow-hidden">
-        <div
-            class="border-b-[6px] border-paper bg-alert p-6 flex flex-col md:flex-row justify-between items-center shrink-0 gap-4">
-            <h2
-                class="font-display text-4xl sm:text-6xl text-ink leading-none shadow-[4px_4px_0_#FFF] bg-acid px-4 border-4 border-ink transform -rotate-1 inline-block">
-                TERMINAL</h2>
-            <div class="flex gap-4">
-                <button id="admin-refresh-btn"
-                    class="hidden font-display text-2xl sm:text-4xl bg-ink text-paper border-4 border-paper px-6 py-4 hover:bg-acid hover:text-ink hover:border-ink transition-none shadow-brutal active:translate-y-2 active:shadow-none">
-                    REFRESH
-                </button>
-                <button id="admin-logout-btn"
-                    class="hidden font-display text-2xl sm:text-4xl bg-ink text-paper border-4 border-paper px-6 py-4 hover:bg-cyan hover:text-ink hover:border-ink transition-none shadow-brutal active:translate-y-2 active:shadow-none">
-                    LOGOUT
-                </button>
-                <button id="admin-close-btn"
-                    class="font-display text-2xl sm:text-4xl bg-ink text-paper border-4 border-paper px-6 py-4 hover:bg-magenta hover:text-ink hover:border-ink transition-none shadow-brutal active:translate-y-2 active:shadow-none">
-                    [ X ] ABORT
-                </button>
-            </div>
-        </div>
-
-        <div class="flex-grow overflow-y-auto p-4 sm:p-8 md:p-12 bg-ink glitch-bg relative flex flex-col items-center">
-
-            <!-- ADMIN LOGIN VIEW -->
-            <div id="admin-login-view"
-                class="w-full max-w-[600px] bg-paper text-ink p-8 md:p-12 border-heavy shadow-[16px_16px_0_#FF00FF] relative z-10 mt-12 md:mt-24 hidden">
-                <h3 class="font-display text-5xl mb-8 uppercase border-b-4 border-ink pb-2">ADMIN AUTHENTICATION</h3>
-                <form id="admin-login-form" class="flex flex-col gap-6">
-                    <div class="flex flex-col group">
-                        <label
-                            class="font-display text-2xl mb-2 group-focus-within:text-magenta transition-none">PASSPHRASE
-                            [PASSWORD]</label>
-                        <input type="password" id="admin-password" required
-                            class="bg-paper border-heavy border-ink focus:border-magenta p-3 md:p-4 text-xl md:text-2xl font-bold focus:outline-none focus:bg-ink focus:text-magenta shadow-[4px_4px_0_#000] focus:shadow-[2px_2px_0_#000] focus:translate-x-1 focus:translate-y-1 transition-none">
-                    </div>
-                    <button type="submit" id="admin-login-submit"
-                        class="mt-4 bg-ink text-acid font-display text-3xl md:text-4xl py-4 border-heavy border-ink hover:bg-alert hover:text-paper shadow-magenta hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0_#000] transition-all disabled:opacity-50">
-                        INITIATE OVERRIDE
-                    </button>
-                </form>
-            </div>
-
-            <!-- ADMIN CONTENT VIEW -->
-            <div class="w-full max-w-[1200px] relative z-10 hidden" id="admin-content-view">
-                <div id="messages-container" class="w-full">
-                    <!-- Messages populated via JS -->
-                </div>
-            </div>
-
         </div>
     </div>
 
-    <!-- PURE FETCH API FOR SUPABASE (BYPASSES MOBILE RESTRICTIONS) -->
+    <!-- MAIN LOGIC (JS) -->
     <script>
-        // --- ENVIRONMENT CONFIGURATION ---
-        // REPLACE THESE WITH YOUR ACTUAL KEYS!
-        const supabaseUrl = 'https://mlctklppubajjhtwmnjm.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sY3RrbHBwdWJhampodHdtbmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTg5MTEsImV4cCI6MjA4NzU5NDkxMX0.cO2XLVGfqcJvxShu_pIetLHdnWGbM8IbLOJgCGnHdNg';
+        // --- THEME TOGGLE LOGIC ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
 
-        // --- BOOT SEQUENCE --- 
-        const bootScreen = document.getElementById('boot-screen');
-        const bootCounter = document.getElementById('boot-counter');
-        const bootLogs = document.getElementById('boot-logs');
-        const mainContent = document.getElementById('main-content');
-
-        const logLines = [
-            "> OVERRIDING DEFAULT CSS...",
-            "> INJECTING NEON VARIABLES...",
-            "> BREAKING GRID SYSTEMS...",
-            "> MAXIMIZING FONT WEIGHTS...",
-            "> REMOVING ALL ROUNDED CORNERS...",
-            "> SENSORY OVERLOAD READY."
-        ];
-
-        let counter = 0;
-        let logIndex = 0;
-
-        const bootInterval = setInterval(() => {
-            counter += Math.floor(Math.random() * 15) + 1;
-
-            if (counter > (logIndex + 1) * 15 && logIndex < logLines.length) {
-                bootLogs.innerHTML += logLines[logIndex] + "<br>";
-                logIndex++;
+        function updateThemeIcon() {
+            if (document.documentElement.classList.contains('dark')) {
+                themeIcon.classList.replace('ph-moon', 'ph-sun');
+            } else {
+                themeIcon.classList.replace('ph-sun', 'ph-moon');
             }
+        }
 
-            if (counter >= 100) {
-                counter = 100;
-                clearInterval(bootInterval);
-                finishBoot();
-            }
+        // Initialize icon correctly on load
+        updateThemeIcon();
 
-            bootCounter.innerText = counter < 10 ? '0' + counter + '%' : counter + '%';
-            const colors = ['#DFFF00', '#FF00FF', '#00FFFF', '#FF3300', '#FFFFFF'];
-            bootCounter.style.color = colors[Math.floor(Math.random() * colors.length)];
-        }, 80);
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcon();
+        });
 
-        function finishBoot() {
-            bootCounter.innerText = "100%";
-            bootCounter.style.color = "#DFFF00";
-            bootCounter.classList.remove('blink');
+
+        // --- BOOT SEQUENCE ANIMATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('loader');
+            const status = document.getElementById('loader-status');
+
+            setTimeout(() => { status.innerText = "MOUNTING MODULES..."; }, 600);
+            setTimeout(() => { status.innerText = "BYPASSING SECURITY..."; }, 1200);
+            setTimeout(() => { status.innerText = "ACCESS GRANTED."; status.classList.add('text-brutalGreen'); }, 1800);
 
             setTimeout(() => {
-                bootScreen.classList.add('crash');
-                setTimeout(() => {
-                    document.body.classList.remove('overflow-hidden');
-                    mainContent.classList.remove('opacity-0');
-                    bootScreen.remove();
-                }, 400);
-            }, 800);
-        }
+                loader.classList.add('slide-up');
+                setTimeout(() => loader.remove(), 600); // Remove DOM element after transition
+            }, 2000);
+        });
 
-        // --- HOVER REVEAL ---
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-            const workRows = document.querySelectorAll('.work-row');
-            workRows.forEach(row => {
-                const img = row.querySelector('.hover-img');
-                row.addEventListener('mousemove', (e) => {
-                    if (!img) return;
-                    const rect = row.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    img.style.left = `${x}px`;
-                    img.style.top = `${y}px`;
-                });
+        // --- SUPABASE CONFIG ---
+        const supabaseUrl = 'https://mlctklppubajjhtwmnjm.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sY3RrbHBwdWJhampodHdtbmptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMTg5MTEsImV4cCI6MjA4NzU5NDkxMX0.cO2XLVGfqcJvxShu_pIetLHdnWGbM8IbLOJgCGnHdNg';
+        const supabaseBucketName = 'portfolio';
+
+        // --- TAB NAVIGATION SYSTEM ---
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const viewSections = document.querySelectorAll('.view-section');
+
+        function switchTab(targetId) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            viewSections.forEach(section => {
+                section.classList.remove('active');
+                // Reset animation
+                section.style.animation = 'none';
+                section.offsetHeight; /* trigger reflow */
+                section.style.animation = null;
             });
-        }
 
-        // --- MOBILE MENU ---
-        const menuTrigger = document.getElementById('mobile-menu-trigger');
-        const closeMenuBtn = document.getElementById('close-menu-btn');
-        const menuOverlay = document.getElementById('mobile-menu-overlay');
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            document.querySelectorAll(`.nav-btn[data-target="${targetId}"]`).forEach(b => {
+                if (b.tagName === 'BUTTON' && (b.parentElement.tagName === 'DIV' || b.parentElement.tagName === 'NAV')) {
+                    b.classList.add('active');
+                }
+            });
 
-        function toggleMobileMenu() {
-            const isClosed = menuOverlay.classList.contains('-translate-y-full');
-            if (isClosed) {
-                menuOverlay.classList.remove('-translate-y-full', 'pointer-events-none');
-                document.body.classList.add('overflow-hidden');
-                menuTrigger.innerHTML = "[ X ]";
-                menuTrigger.classList.replace('bg-ink', 'bg-alert');
-                menuTrigger.classList.replace('text-acid', 'text-ink');
-            } else {
-                menuOverlay.classList.add('-translate-y-full', 'pointer-events-none');
-                document.body.classList.remove('overflow-hidden');
-                menuTrigger.innerHTML = "[ NAV ]";
-                menuTrigger.classList.replace('bg-alert', 'bg-ink');
-                menuTrigger.classList.replace('text-ink', 'text-acid');
+            const targetView = document.getElementById(targetId);
+            if (targetView) {
+                targetView.classList.add('active');
+                targetView.parentElement.scrollTop = 0;
             }
         }
 
-        menuTrigger.addEventListener('click', toggleMobileMenu);
-        closeMenuBtn.addEventListener('click', toggleMobileMenu);
-        mobileNavLinks.forEach(link => link.addEventListener('click', toggleMobileMenu));
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget.getAttribute('data-target');
+                if (target) switchTab(target);
+            });
+        });
 
-        // --- UI UTILS ---
+        // --- NOTIFICATION TOAST SYSTEM ---
         const statusOverlay = document.getElementById('status-overlay');
         const statusBox = document.getElementById('status-box');
         const statusTitle = document.getElementById('status-title');
         const statusMessage = document.getElementById('status-message');
+        const statusIconBg = document.getElementById('status-icon-bg');
+        const statusIcon = document.getElementById('status-icon');
         const closeStatusBtn = document.getElementById('close-status');
-        const contactForm = document.getElementById('contact-form');
-        const submitBtn = document.getElementById('submit-btn');
+        let statusTimeout;
 
         function showStatus(title, msg, type = 'error') {
             statusTitle.innerText = title;
             statusMessage.innerText = msg;
 
+            statusIconBg.className = 'w-12 h-12 border-4 border-dark flex items-center justify-center shrink-0 shadow-brutal-sm ';
+            statusIcon.className = 'text-3xl ph-bold ';
+
             if (type === 'success') {
-                statusBox.classList.replace('bg-alert', 'bg-acid');
-                statusTitle.classList.replace('text-paper', 'text-ink');
+                statusIconBg.classList.add('bg-brutalGreen', 'text-dark');
+                statusIcon.classList.add('ph-check');
             } else {
-                statusBox.classList.replace('bg-acid', 'bg-alert');
-                statusTitle.classList.replace('text-ink', 'text-paper');
+                statusIconBg.classList.add('bg-brutalRed', 'text-white');
+                statusIcon.classList.add('ph-warning-circle');
             }
 
-            statusOverlay.classList.remove('pointer-events-none', 'opacity-0');
-            statusBox.classList.replace('scale-75', 'scale-100');
+            statusOverlay.classList.remove('pointer-events-none', 'opacity-0', 'translate-x-12');
+            statusOverlay.classList.add('opacity-100', 'translate-x-0');
+
+            clearTimeout(statusTimeout);
+            statusTimeout = setTimeout(hideStatus, 5000);
         }
 
         function hideStatus() {
-            statusOverlay.classList.add('pointer-events-none', 'opacity-0');
-            statusBox.classList.replace('scale-100', 'scale-75');
+            statusOverlay.classList.remove('opacity-100', 'translate-x-0');
+            statusOverlay.classList.add('opacity-0', 'translate-x-12');
+            setTimeout(() => {
+                statusOverlay.classList.add('pointer-events-none');
+            }, 200);
         }
 
         closeStatusBtn.addEventListener('click', hideStatus);
 
-        // --- FORM SUBMISSION (PURE FETCH API) ---
+        // --- CONTACT FORM SUBMISSION ---
+        const contactForm = document.getElementById('contact-form');
+        const submitBtn = document.getElementById('submit-btn');
+
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             if (supabaseUrl === 'YOUR_SUPABASE_URL') {
-                showStatus("SYSTEM OFFLINE", "DATABASE NOT CONFIGURED. ADD KEYS TO HTML FILE.");
+                showStatus("Error", "Database configuration missing.");
                 return;
             }
 
@@ -829,7 +1066,7 @@
             const message = document.getElementById('form-message').value;
 
             submitBtn.disabled = true;
-            submitBtn.innerText = "EXECUTING...";
+            submitBtn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> EXECUTING...`;
 
             try {
                 const response = await fetch(`${supabaseUrl}/rest/v1/messages`, {
@@ -843,207 +1080,381 @@
                     body: JSON.stringify({ name, email, message })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || "Failed to save to database");
-                }
+                if (!response.ok) throw new Error((await response.json()).message || "Transmission failed");
 
-                showStatus("MISSION SUCCESS", "TRANSMISSION RECEIVED. EXPECT CHAOS.", "success");
+                showStatus("Success", "Signal received. Awaiting comms.", "success");
                 contactForm.reset();
             } catch (err) {
-                console.error("Fetch Error Details:", err);
                 const errMsg = err.message || JSON.stringify(err);
-
-                // Detailed error for missing RLS (Row Level Security)
                 if (errMsg.includes('violates row-level security')) {
-                    showStatus("SYSTEM FAILURE", "DB ERROR: YOU MUST DISABLE RLS IN SUPABASE SQL EDITOR TO ALLOW WRITING.");
+                    showStatus("Database Error", "Security firewalls active. Write access denied.");
                 } else {
-                    showStatus("SYSTEM FAILURE", "DB ERROR: " + errMsg.toUpperCase());
+                    showStatus("Error", errMsg);
                 }
-
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = "EXECUTE SUBMISSION &crarr;";
+                submitBtn.innerHTML = `<i class="ph-bold ph-terminal"></i> Execute Submission`;
             }
         });
 
-        // --- ADMIN DASHBOARD ---
-        const adminOpenBtn = document.getElementById('admin-open-btn');
-        const adminCloseBtn = document.getElementById('admin-close-btn');
-        const adminRefreshBtn = document.getElementById('admin-refresh-btn');
-        const adminLogoutBtn = document.getElementById('admin-logout-btn');
-        const adminDashboard = document.getElementById('admin-dashboard');
-
+        // --- ADMIN DASHBOARD LOGIC ---
+        const adminModal = document.getElementById('admin-modal');
+        const adminOpenBtns = document.querySelectorAll('.admin-open-btn');
+        const adminCloseBtns = document.querySelectorAll('.admin-close-btn');
         const adminLoginView = document.getElementById('admin-login-view');
         const adminContentView = document.getElementById('admin-content-view');
         const adminLoginForm = document.getElementById('admin-login-form');
         const adminLoginSubmit = document.getElementById('admin-login-submit');
+        const adminRefreshBtn = document.getElementById('admin-refresh-btn');
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
         const messagesContainer = document.getElementById('messages-container');
 
-        let isAdminAuthenticated = false;
-        const ADMIN_PASSPHRASE = "mithu0406";
+        let isAdminAuth = false;
+        const ADMIN_PASS = "mithu0406";
+
+        function openAdmin() {
+            adminModal.classList.remove('hidden');
+            adminModal.classList.add('flex');
+            setTimeout(() => {
+                adminModal.classList.remove('opacity-0');
+                adminLoginView.classList.remove('scale-95');
+                adminContentView.classList.remove('scale-95');
+            }, 10);
+            updateAdminUI();
+        }
+
+        function closeAdmin() {
+            adminModal.classList.add('opacity-0');
+            adminLoginView.classList.add('scale-95');
+            adminContentView.classList.add('scale-95');
+            setTimeout(() => {
+                adminModal.classList.add('hidden');
+                adminModal.classList.remove('flex');
+            }, 200);
+        }
+
+        adminOpenBtns.forEach(btn => btn.addEventListener('click', openAdmin));
+        adminCloseBtns.forEach(btn => btn.addEventListener('click', closeAdmin));
 
         function updateAdminUI() {
-            if (isAdminAuthenticated) {
+            if (isAdminAuth) {
                 adminLoginView.classList.add('hidden');
                 adminContentView.classList.remove('hidden');
-                adminLogoutBtn.classList.remove('hidden');
-                adminRefreshBtn.classList.remove('hidden');
+                adminContentView.classList.add('flex');
                 fetchMessages();
             } else {
                 adminLoginView.classList.remove('hidden');
                 adminContentView.classList.add('hidden');
-                adminLogoutBtn.classList.add('hidden');
-                adminRefreshBtn.classList.add('hidden');
+                adminContentView.classList.remove('flex');
             }
         }
 
-        adminOpenBtn.addEventListener('click', () => {
-            adminDashboard.classList.remove('hidden');
-            adminDashboard.classList.add('flex');
-            document.body.classList.add('overflow-hidden');
-            updateAdminUI();
-        });
-
-        adminCloseBtn.addEventListener('click', () => {
-            adminDashboard.classList.add('hidden');
-            adminDashboard.classList.remove('flex');
-            document.body.classList.remove('overflow-hidden');
-        });
-
-        adminRefreshBtn.addEventListener('click', () => {
-            fetchMessages();
-        });
-
-        // Handle Admin Login Submission 
         adminLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const pass = document.getElementById('admin-password').value;
 
             adminLoginSubmit.disabled = true;
-            adminLoginSubmit.innerText = "AUTHENTICATING...";
+            adminLoginSubmit.innerText = "VERIFYING...";
 
             setTimeout(() => {
-                if (pass === ADMIN_PASSPHRASE) {
-                    isAdminAuthenticated = true;
+                if (pass === ADMIN_PASS) {
+                    isAdminAuth = true;
                     adminLoginForm.reset();
                     updateAdminUI();
                 } else {
-                    showStatus("ACCESS DENIED", "INVALID PASSPHRASE.");
+                    showStatus("Access Denied", "Incorrect passkey.", "error");
                 }
                 adminLoginSubmit.disabled = false;
-                adminLoginSubmit.innerText = "INITIATE OVERRIDE";
+                adminLoginSubmit.innerText = "Unlock System";
             }, 600);
         });
 
-        // Handle Admin Logout
         adminLogoutBtn.addEventListener('click', () => {
-            isAdminAuthenticated = false;
+            isAdminAuth = false;
             updateAdminUI();
         });
 
-        // --- FETCH MESSAGES PURE FETCH API ---
-        async function fetchMessages() {
-            if (supabaseUrl === 'YOUR_SUPABASE_URL') {
-                messagesContainer.innerHTML = `<div class="p-8 border-heavy border-alert bg-alert text-paper text-center font-display text-4xl shadow-brutal mt-12">SYSTEM OFFLINE. CONFIGURE SUPABASE KEYS.</div>`;
-                return;
-            }
+        adminRefreshBtn.addEventListener('click', () => {
+            fetchMessages();
+            fetchProjects();
+        });
 
-            messagesContainer.innerHTML = `<div class="p-8 border-heavy border-paper text-center font-display text-3xl text-acid blink mt-12">DOWNLOADING FROM MAINFRAME...</div>`;
+        // --- ADMIN TABS LOGIC ---
+        const tabMessages = document.getElementById('tab-messages');
+        const tabPortfolio = document.getElementById('tab-portfolio');
+        const panelMessages = document.getElementById('messages-container');
+        const panelPortfolio = document.getElementById('portfolio-manager');
+
+        tabMessages.addEventListener('click', () => {
+            tabMessages.classList.replace('bg-white', 'bg-dark');
+            tabMessages.classList.replace('text-dark', 'text-white');
+            tabPortfolio.classList.replace('bg-dark', 'bg-white');
+            tabPortfolio.classList.replace('text-white', 'text-dark');
+            panelMessages.classList.remove('hidden');
+            panelPortfolio.classList.add('hidden');
+        });
+
+        tabPortfolio.addEventListener('click', () => {
+            tabPortfolio.classList.replace('bg-white', 'bg-dark');
+            tabPortfolio.classList.replace('text-dark', 'text-white');
+            tabMessages.classList.replace('bg-dark', 'bg-white');
+            tabMessages.classList.replace('text-white', 'text-dark');
+            panelPortfolio.classList.remove('hidden');
+            panelMessages.classList.add('hidden');
+        });
+
+        // --- PORTFOLIO SYSTEM LOGIC ---
+        const addProjectForm = document.getElementById('add-project-form');
+        const addProjectSubmit = document.getElementById('add-project-submit');
+        const adminProjectsList = document.getElementById('admin-projects-list');
+        const archiveGrid = document.getElementById('archive-grid');
+        const galleryGrid = document.getElementById('gallery-grid');
+        const archiveCount = document.getElementById('archive-count');
+        const fileInput = document.getElementById('p-image-file');
+
+        window.addEventListener('DOMContentLoaded', fetchProjects);
+
+        async function fetchProjects() {
+            if (supabaseUrl === 'YOUR_SUPABASE_URL') return;
 
             try {
-                const response = await fetch(`${supabaseUrl}/rest/v1/messages?order=created_at.desc`, {
-                    method: 'GET',
+                const res = await fetch(`${supabaseUrl}/rest/v1/projects?order=created_at.desc`, {
+                    headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
+                });
+                if (!res.ok) throw new Error("Fetch failed");
+                const projects = await res.json();
+
+                renderPublicProjects(projects);
+                renderAdminProjects(projects);
+            } catch (err) {
+                console.error("Error fetching projects:", err);
+                archiveGrid.innerHTML = `<div class="col-span-full p-8 text-center text-white font-black uppercase bg-brutalRed border-4 border-dark shadow-brutal">Failed to load archive. Check database.</div>`;
+            }
+        }
+
+        addProjectForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            addProjectSubmit.disabled = true;
+            addProjectSubmit.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> UPLOADING...`;
+
+            try {
+                const file = fileInput.files[0];
+                if (!file) throw new Error("Please select an image file.");
+
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
+
+                const uploadRes = await fetch(`${supabaseUrl}/storage/v1/object/${supabaseBucketName}/${fileName}`, {
+                    method: 'POST',
                     headers: {
                         'apikey': supabaseAnonKey,
                         'Authorization': `Bearer ${supabaseAnonKey}`,
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': file.type
+                    },
+                    body: file
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || "Failed to fetch");
+                if (!uploadRes.ok) {
+                    const errData = await uploadRes.json();
+                    throw new Error(`Storage Error: ${errData.message}`);
                 }
 
-                const data = await response.json();
-                renderMessages(data);
+                const publicImageUrl = `${supabaseUrl}/storage/v1/object/public/${supabaseBucketName}/${fileName}`;
+                addProjectSubmit.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> SAVING_DB...`;
+
+                const payload = {
+                    title: document.getElementById('p-title').value,
+                    category: document.getElementById('p-category').value,
+                    image_url: publicImageUrl,
+                    year: document.getElementById('p-year').value
+                };
+
+                const dbRes = await fetch(`${supabaseUrl}/rest/v1/projects`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!dbRes.ok) throw new Error("Database save failed.");
+
+                showStatus("Success", "Asset compiled into database.", "success");
+                addProjectForm.reset();
+                fetchProjects();
             } catch (err) {
-                console.error("Error fetching messages:", err);
-                messagesContainer.innerHTML = `<div class="p-8 border-heavy border-alert bg-alert text-paper text-center font-display text-4xl shadow-brutal mt-12 break-words">DB ERROR: ${err.message.toUpperCase()}</div>`;
+                showStatus("Upload Error", err.message);
+                console.error(err);
+            } finally {
+                addProjectSubmit.disabled = false;
+                addProjectSubmit.innerHTML = `<i class="ph-bold ph-upload-simple"></i> Execute Upload`;
             }
+        });
+
+        adminProjectsList.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.delete-proj-btn');
+            if (btn) {
+                btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
+                btn.disabled = true;
+                try {
+                    const res = await fetch(`${supabaseUrl}/rest/v1/projects?id=eq.${btn.getAttribute('data-id')}`, {
+                        method: 'DELETE',
+                        headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
+                    });
+                    if (!res.ok) throw new Error("Delete failed");
+
+                    fetchProjects();
+                    showStatus("Success", "Asset purged from index.", "success");
+                } catch (err) {
+                    showStatus("Error", err.message);
+                    btn.innerHTML = `<i class="ph-bold ph-trash"></i>`;
+                    btn.disabled = false;
+                }
+            }
+        });
+
+        function renderAdminProjects(projects) {
+            if (!projects.length) {
+                adminProjectsList.innerHTML = `<div class="col-span-full font-mono font-bold bg-dark text-white p-4 uppercase">NULL_RECORDS_FOUND</div>`;
+                return;
+            }
+            adminProjectsList.innerHTML = projects.map(p => `
+                <div class="bg-white border-4 border-dark p-4 flex gap-4 items-center shadow-brutal-sm text-dark">
+                    <img src="${p.image_url}" class="w-16 h-16 border-2 border-dark object-cover grayscale" alt="${p.title}" loading="lazy">
+                    <div class="flex-grow overflow-hidden">
+                        <h4 class="font-black text-sm uppercase truncate">${p.title}</h4>
+                        <p class="text-xs font-mono font-bold mt-1 bg-brutalYellow border-2 border-dark px-1 inline-block">${p.category} | ${p.year}</p>
+                    </div>
+                    <button data-id="${p.id}" class="delete-proj-btn w-12 h-12 border-4 border-dark bg-brutalRed text-white hover:bg-dark hover:-translate-y-1 hover:translate-x-1 shadow-[2px_2px_0_0_var(--color-dark)] flex items-center justify-center shrink-0 transition-all">
+                        <i class="ph-bold ph-trash text-xl"></i>
+                    </button>
+                </div>
+            `).join('');
         }
 
-        // Render Message Cards
-        function renderMessages(msgs) {
-            if (!msgs || msgs.length === 0) {
-                messagesContainer.innerHTML = `<div class="p-12 border-heavy border-paper text-center font-display text-5xl text-paper bg-ink opacity-50 border-dashed mt-12">ARCHIVE EMPTY.</div>`;
+        function renderPublicProjects(projects) {
+            archiveCount.innerText = `${projects.length}_INDEXED`;
+
+            if (!projects.length) {
+                archiveGrid.innerHTML = `
+                    <div class="bg-white border-4 border-dark border-dashed p-10 flex flex-col items-center justify-center min-h-[300px] col-span-full opacity-50 grayscale">
+                        <i class="ph-bold ph-database text-6xl mb-4 text-dark"></i>
+                        <span class="text-xl font-black uppercase tracking-widest text-dark">AWAITING_DATA</span>
+                    </div>`;
+                galleryGrid.innerHTML = `<div class="col-span-full text-center font-black text-xl uppercase py-16 border-4 border-dark bg-white text-dark border-dashed">GALLERY_EMPTY</div>`;
                 return;
             }
 
-            messagesContainer.innerHTML = msgs.map((msg, idx) => {
-                const dateStr = msg.created_at ? new Date(msg.created_at).toLocaleString() : 'JUST NOW';
-                const shadowColor = idx % 2 === 0 ? '#DFFF00' : '#00FFFF';
-
-                return `
-                <div class="border-heavy border-paper p-6 md:p-8 mb-8 bg-paper text-ink transition-transform hover:-translate-y-2 group relative z-10" style="box-shadow: 12px 12px 0px ${shadowColor};">
-                    <div class="flex flex-col md:flex-row justify-between mb-4 border-b-4 border-ink pb-4 gap-4">
-                        <div>
-                            <div class="font-display text-4xl md:text-5xl uppercase tracking-tighter">${msg.name}</div>
-                            <div class="font-bold text-magenta text-xl md:text-2xl mt-1 underline decoration-4 underline-offset-4 break-all">${msg.email}</div>
+            // Render Archive Cards
+            archiveGrid.innerHTML = projects.map(p => `
+                <div class="bg-white border-4 border-dark shadow-brutal hover:-translate-y-2 hover:translate-x-2 transition-transform group cursor-pointer flex flex-col h-[380px] p-4 relative text-dark">
+                    <div class="flex-1 w-full border-4 border-dark overflow-hidden relative mb-4 bg-dark">
+                        <img src="${p.image_url}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300" loading="lazy">
+                        <div class="absolute top-2 right-2 bg-brutalYellow border-2 border-dark px-2 font-mono font-bold text-xs uppercase">${p.year}</div>
+                    </div>
+                    <div class="flex justify-between items-end shrink-0">
+                        <div class="overflow-hidden pr-2">
+                            <h3 class="text-2xl font-black uppercase mb-1 truncate leading-none">${p.title}</h3>
+                            <span class="text-xs font-mono font-bold bg-dark text-white px-2 py-0.5 whitespace-nowrap">${p.category}</span>
                         </div>
-                        <div class="flex flex-col items-start md:items-end gap-3 shrink-0">
-                            <div class="font-mono font-bold text-sm md:text-lg text-left md:text-right bg-ink text-acid p-2 border-2 border-ink shadow-[4px_4px_0_#FF00FF]">
-                                LOG // ${dateStr}
+                        <div class="w-12 h-12 border-4 border-dark bg-white group-hover:bg-brutalRed group-hover:text-white flex items-center justify-center transition-colors">
+                            <i class="ph-bold ph-arrow-up-right text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render Masonry Gallery
+            galleryGrid.innerHTML = projects.map(p => `
+                <div class="relative group border-4 border-dark mb-6 break-inside-avoid cursor-pointer shadow-brutal hover:-translate-y-1 hover:translate-x-1 transition-transform bg-dark">
+                    <img src="${p.image_url}" class="w-full object-cover grayscale opacity-80 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300" alt="${p.title}" loading="lazy">
+                    <div class="absolute inset-0 bg-brutalRed/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-4 text-center">
+                        <i class="ph-bold ph-magnifying-glass-plus text-5xl text-white mb-2 shadow-sm"></i>
+                        <h4 class="font-black text-white text-xl uppercase border-2 border-white px-3 bg-dark truncate max-w-full">${p.title}</h4>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function fetchMessages() {
+            if (supabaseUrl === 'YOUR_SUPABASE_URL') return;
+            messagesContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-dark font-mono font-bold uppercase">
+                    <i class="ph-bold ph-spinner animate-spin text-5xl mb-4 text-brutalBlue"></i>
+                    <p>Decrypting Data...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${supabaseUrl}/rest/v1/messages?order=created_at.desc`, {
+                    headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
+                });
+                if (!res.ok) throw new Error("Fetch failed");
+                renderMessages(await res.json());
+            } catch (err) {
+                messagesContainer.innerHTML = `<div class="p-6 text-center text-white font-black uppercase bg-brutalRed border-4 border-dark shadow-brutal">ERR: ${err.message}</div>`;
+            }
+        }
+
+        function renderMessages(msgs) {
+            if (!msgs.length) {
+                messagesContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full border-4 border-dashed border-dark bg-white text-dark p-12 opacity-50">
+                        <i class="ph-bold ph-tray text-7xl mb-4"></i>
+                        <h3 class="text-3xl font-black uppercase">BUFFER_EMPTY</h3>
+                        <p class="font-mono font-bold mt-2">No incoming comms logged.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            messagesContainer.innerHTML = msgs.map(msg => `
+                <div class="bg-white text-dark border-4 border-dark p-6 md:p-8 mb-6 flex flex-col hover:-translate-y-1 hover:translate-x-1 shadow-brutal transition-transform group">
+                    <div class="flex flex-col md:flex-row justify-between items-start mb-6 gap-4 border-b-4 border-dark pb-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 border-4 border-dark bg-brutalYellow flex items-center justify-center text-3xl font-black uppercase shrink-0 shadow-brutal-sm">
+                                ${msg.name ? msg.name.charAt(0) : '?'}
                             </div>
-                            <button data-id="${msg.id}" class="delete-msg-btn bg-alert text-paper font-display text-xl px-4 py-2 border-4 border-ink hover:bg-ink hover:text-alert shadow-[4px_4px_0_#000] active:translate-y-1 active:shadow-none transition-all">
-                                [ X ] PURGE
+                            <div>
+                                <h3 class="text-2xl font-black uppercase leading-tight mb-1">${msg.name}</h3>
+                                <a href="mailto:${msg.email}" class="text-brutalBlue font-mono font-bold underline hover:bg-brutalBlue hover:text-white px-1 transition-colors">${msg.email}</a>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-3 w-full md:w-auto">
+                            <span class="text-xs font-mono font-bold bg-dark text-white px-3 py-1 border-2 border-dark shadow-brutal-sm uppercase whitespace-nowrap">
+                                <i class="ph-bold ph-clock mr-1"></i> ${new Date(msg.created_at || Date.now()).toLocaleString()}
+                            </span>
+                            <button data-id="${msg.id}" class="delete-msg-btn text-sm font-black uppercase border-4 border-dark bg-base text-dark hover:bg-brutalRed hover:text-white px-4 py-2 shadow-[2px_2px_0_0_var(--color-dark)] transition-all flex items-center gap-2 active:shadow-none active:translate-x-[2px] active:translate-y-[2px]">
+                                <i class="ph-bold ph-trash text-lg"></i> Purge
                             </button>
                         </div>
                     </div>
-                    <div class="font-bold text-xl md:text-3xl whitespace-pre-wrap leading-tight mt-6">${msg.message}</div>
-                    <div class="absolute -top-4 -right-4 bg-ink text-cyan font-display text-2xl px-3 py-1 border-4 border-paper shadow-brutal hidden md:block opacity-0 group-hover:opacity-100 transition-opacity">
-                        REF_ID: ${msg.id.substring(0, 8)}
+                    <div class="bg-base border-4 border-dark p-6 text-lg font-mono font-bold whitespace-pre-wrap leading-relaxed shadow-inner">
+                        ${msg.message}
                     </div>
                 </div>
-                `;
-            }).join('');
+            `).join('');
         }
 
-        // Handle Delete Button Clicks (PURE FETCH API)
         messagesContainer.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('delete-msg-btn')) {
-                const msgId = e.target.getAttribute('data-id');
-                const btn = e.target;
-
-                btn.innerText = "PURGING...";
-                btn.classList.replace('bg-alert', 'bg-ink');
-                btn.classList.replace('text-paper', 'text-acid');
+            const btn = e.target.closest('.delete-msg-btn');
+            if (btn) {
+                btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i>`;
                 btn.disabled = true;
-
                 try {
-                    const response = await fetch(`${supabaseUrl}/rest/v1/messages?id=eq.${msgId}`, {
+                    const res = await fetch(`${supabaseUrl}/rest/v1/messages?id=eq.${btn.getAttribute('data-id')}`, {
                         method: 'DELETE',
-                        headers: {
-                            'apikey': supabaseAnonKey,
-                            'Authorization': `Bearer ${supabaseAnonKey}`
-                        }
+                        headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                     });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || "Failed to delete");
-                    }
-
-                    fetchMessages(); // Refresh UI after delete
+                    if (!res.ok) throw new Error("Delete failed");
+                    fetchMessages();
+                    showStatus("Success", "Record purged.", "success");
                 } catch (err) {
-                    console.error("Delete failed", err);
-                    const errMsg = err.message || JSON.stringify(err);
-                    showStatus("PURGE FAILED", "DB ERROR: " + errMsg.toUpperCase());
-
-                    btn.innerText = "[ X ] PURGE";
-                    btn.classList.replace('bg-ink', 'bg-alert');
-                    btn.classList.replace('text-acid', 'text-paper');
+                    showStatus("Error", err.message);
+                    btn.innerHTML = `<i class="ph-bold ph-trash text-lg"></i> Purge`;
                     btn.disabled = false;
                 }
             }
