@@ -729,7 +729,7 @@
                             </div>
 
                             <div class="pt-4">
-                                <button type="submit" id="submit-btn"
+                                <button type="button" id="submit-btn"
                                     class="w-full bg-brutalRed text-white border-4 border-dark font-black text-2xl uppercase py-6 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all flex justify-center items-center gap-3">
                                     <span id="submit-icon" class="flex items-center"><i
                                             class="ph-bold ph-terminal"></i></span>
@@ -833,7 +833,7 @@
                         class="bg-base border-4 border-dark p-4 text-dark text-center tracking-[0.5em] font-mono focus:outline-none focus:bg-brutalYellow transition-colors shadow-inner text-xl"
                         placeholder="••••••••">
                 </div>
-                <button type="submit" id="admin-login-submit"
+                <button type="button" id="admin-login-submit"
                     class="w-full bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all">
                     Unlock System
                 </button>
@@ -915,7 +915,7 @@
                             class="bg-base border-4 border-dark p-4 text-dark font-mono focus:bg-brutalYellow outline-none transition-colors md:col-span-2"
                             placeholder="YEAR [E.G., 2026]">
 
-                        <button type="submit" id="add-project-submit"
+                        <button type="button" id="add-project-submit"
                             class="bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all flex justify-center items-center gap-2 md:col-span-2">
                             <span id="upload-icon" class="flex items-center"><i
                                     class="ph-bold ph-upload-simple"></i></span>
@@ -1057,8 +1057,14 @@
         const contactForm = document.getElementById('contact-form');
         const submitBtn = document.getElementById('submit-btn');
 
-        contactForm.addEventListener('submit', async (e) => {
+        submitBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+
+            // Native HTML5 Validation check
+            if (!contactForm.checkValidity()) {
+                contactForm.reportValidity();
+                return;
+            }
 
             if (supabaseUrl === 'YOUR_SUPABASE_URL') {
                 showStatus("Error", "Database configuration missing.");
@@ -1072,14 +1078,13 @@
             const submitIcon = document.getElementById('submit-icon');
             const submitText = document.getElementById('submit-text');
 
-            submitBtn.disabled = true;
+            submitBtn.classList.add('pointer-events-none', 'opacity-75');
             submitIcon.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
             submitText.innerText = `EXECUTING...`;
 
             try {
                 const response = await fetch(`${supabaseUrl}/rest/v1/messages`, {
                     method: 'POST',
-                    mode: 'cors',
                     headers: {
                         'apikey': supabaseAnonKey,
                         'Authorization': `Bearer ${supabaseAnonKey}`,
@@ -1100,13 +1105,13 @@
             } catch (err) {
                 let errMsg = err.message || JSON.stringify(err);
                 if (errMsg === 'Failed to fetch' || errMsg.includes('NetworkError')) {
-                    errMsg = "Network Blocked. Check mobile connection or adblocker.";
+                    errMsg = "Fetch aborted. " + errMsg;
                 } else if (errMsg.includes('violates row-level security')) {
                     errMsg = "Security firewalls active. Write access denied.";
                 }
                 showStatus("Error", errMsg);
             } finally {
-                submitBtn.disabled = false;
+                submitBtn.classList.remove('pointer-events-none', 'opacity-75');
                 submitIcon.innerHTML = `<i class="ph-bold ph-terminal"></i>`;
                 submitText.innerText = `Execute Submission`;
             }
@@ -1164,11 +1169,17 @@
             }
         }
 
-        adminLoginForm.addEventListener('submit', (e) => {
+        adminLoginSubmit.addEventListener('click', (e) => {
             e.preventDefault();
+
+            if (!adminLoginForm.checkValidity()) {
+                adminLoginForm.reportValidity();
+                return;
+            }
+
             const pass = document.getElementById('admin-password').value;
 
-            adminLoginSubmit.disabled = true;
+            adminLoginSubmit.classList.add('pointer-events-none', 'opacity-75');
             adminLoginSubmit.innerText = "VERIFYING...";
 
             setTimeout(() => {
@@ -1179,7 +1190,7 @@
                 } else {
                     showStatus("Access Denied", "Incorrect passkey.", "error");
                 }
-                adminLoginSubmit.disabled = false;
+                adminLoginSubmit.classList.remove('pointer-events-none', 'opacity-75');
                 adminLoginSubmit.innerText = "Unlock System";
             }, 600);
         });
@@ -1247,13 +1258,18 @@
             }
         }
 
-        addProjectForm.addEventListener('submit', async (e) => {
+        addProjectSubmit.addEventListener('click', async (e) => {
             e.preventDefault();
+
+            if (!addProjectForm.checkValidity()) {
+                addProjectForm.reportValidity();
+                return;
+            }
 
             const uploadIcon = document.getElementById('upload-icon');
             const uploadText = document.getElementById('upload-text');
 
-            addProjectSubmit.disabled = true;
+            addProjectSubmit.classList.add('pointer-events-none', 'opacity-75');
             uploadIcon.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
             uploadText.innerText = `UPLOADING...`;
 
@@ -1269,7 +1285,6 @@
 
                 const uploadRes = await fetch(`${supabaseUrl}/storage/v1/object/${supabaseBucketName}/${fileName}`, {
                     method: 'POST',
-                    mode: 'cors',
                     headers: {
                         'apikey': supabaseAnonKey,
                         'Authorization': `Bearer ${supabaseAnonKey}`,
@@ -1297,7 +1312,6 @@
 
                 const dbRes = await fetch(`${supabaseUrl}/rest/v1/projects`, {
                     method: 'POST',
-                    mode: 'cors',
                     headers: {
                         'apikey': supabaseAnonKey,
                         'Authorization': `Bearer ${supabaseAnonKey}`,
@@ -1319,12 +1333,12 @@
             } catch (err) {
                 let uploadErrMsg = err.message || JSON.stringify(err);
                 if (uploadErrMsg === 'Failed to fetch' || uploadErrMsg.includes('NetworkError')) {
-                    uploadErrMsg = "Network Blocked. Check mobile connection or adblocker.";
+                    uploadErrMsg = "Fetch aborted. " + uploadErrMsg;
                 }
                 showStatus("Upload Error", uploadErrMsg);
                 console.error(err);
             } finally {
-                addProjectSubmit.disabled = false;
+                addProjectSubmit.classList.remove('pointer-events-none', 'opacity-75');
                 uploadIcon.innerHTML = `<i class="ph-bold ph-upload-simple"></i>`;
                 uploadText.innerText = `Execute Upload`;
             }
