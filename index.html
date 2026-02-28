@@ -699,7 +699,8 @@
                                 ENTER PARAMETERS TO ESTABLISH CONNECTION.</p>
                         </div>
 
-                        <form id="contact-form" action="javascript:void(0);" class="space-y-8 relative z-10">
+                        <!-- DIV INSTEAD OF FORM TO PREVENT MOBILE BROWSER ABORT BUG -->
+                        <div id="contact-form" class="space-y-8 relative z-10">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div class="flex flex-col gap-2">
                                     <label
@@ -729,14 +730,14 @@
                             </div>
 
                             <div class="pt-4">
-                                <button type="submit" id="submit-btn"
+                                <button type="button" id="submit-btn"
                                     class="w-full bg-brutalRed text-white border-4 border-dark font-black text-2xl uppercase py-6 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all flex justify-center items-center gap-3">
                                     <span id="submit-icon" class="flex items-center"><i
                                             class="ph-bold ph-terminal"></i></span>
                                     <span id="submit-text">Execute Submission</span>
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
 
@@ -827,17 +828,18 @@
                     class="font-mono text-sm font-bold bg-brutalRed text-white inline-block px-2 mt-2 border border-dark">
                     AUTH_REQUIRED</p>
             </div>
-            <form id="admin-login-form" action="javascript:void(0);" class="space-y-6">
+            <!-- DIV INSTEAD OF FORM -->
+            <div id="admin-login-form" class="space-y-6">
                 <div class="flex flex-col gap-2">
                     <input type="password" id="admin-password" required
                         class="bg-base border-4 border-dark p-4 text-dark text-center tracking-[0.5em] font-mono focus:outline-none focus:bg-brutalYellow transition-colors shadow-inner text-xl"
                         placeholder="••••••••">
                 </div>
-                <button type="submit" id="admin-login-submit"
+                <button type="button" id="admin-login-submit"
                     class="w-full bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all">
                     Unlock System
                 </button>
-            </form>
+            </div>
             <button
                 class="admin-close-btn absolute top-4 right-4 w-10 h-10 border-2 border-dark bg-white text-dark hover:bg-brutalRed hover:text-white flex items-center justify-center shadow-[2px_2px_0_0_var(--color-dark)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
                 <i class="ph-bold ph-x text-xl"></i>
@@ -895,8 +897,8 @@
                                 class="ph-bold ph-plus text-white"></i></div>
                         Upload Asset
                     </h3>
-                    <form id="add-project-form" action="javascript:void(0);"
-                        class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- DIV INSTEAD OF FORM -->
+                    <div id="add-project-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <input type="text" id="p-title" required
                             class="bg-base border-4 border-dark p-4 text-dark font-mono focus:bg-brutalYellow outline-none transition-colors"
                             placeholder="TITLE [E.G., ESPORTS]">
@@ -916,13 +918,13 @@
                             class="bg-base border-4 border-dark p-4 text-dark font-mono focus:bg-brutalYellow outline-none transition-colors md:col-span-2"
                             placeholder="YEAR [E.G., 2026]">
 
-                        <button type="submit" id="add-project-submit"
+                        <button type="button" id="add-project-submit"
                             class="bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all flex justify-center items-center gap-2 md:col-span-2">
                             <span id="upload-icon" class="flex items-center"><i
                                     class="ph-bold ph-upload-simple"></i></span>
                             <span id="upload-text">Execute Upload</span>
                         </button>
-                    </form>
+                    </div>
                 </div>
 
                 <h3 class="text-2xl font-black uppercase mb-6 border-b-4 border-dark pb-2 text-dark">Database Index</h3>
@@ -935,22 +937,41 @@
 
     <!-- MAIN LOGIC (JS) -->
     <script>
-        // --- ISP BLOCK BYPASS UTILITY ---
-        // Automatically detects when telecom firewalls (Jio/Airtel) block the Supabase domain
-        // and instantly reroutes the data through a proxy without the user noticing.
-        async function ispBypassFetch(url, options) {
-            try {
-                // Attempt standard direct connection first
-                return await fetch(url, options);
-            } catch (err) {
-                // A TypeError on fetch means the network forcefully aborted the request (DNS/IP Block)
-                if (err.name === 'TypeError' || err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
-                    console.warn(`ISP Block Detected for ${url}. Engaging proxy bypass...`);
-                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-                    return await fetch(proxyUrl, options);
+        // --- BULLETPROOF MULTI-PROXY ISP BYPASS ---
+        // Handles direct connection, then cascades through known stable proxies if Jio/Airtel intercepts.
+        async function robustFetch(url, options) {
+            // Remove 'mode' if it exists so proxies can natively handle CORS negotiations
+            const safeOptions = { ...options };
+            delete safeOptions.mode;
+
+            // Waterfall of endpoints: Direct -> Proxy 1 -> Proxy 2 -> Proxy 3
+            const targetUrls = [
+                url,
+                `https://thingproxy.freeboard.io/fetch/${url}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+                `https://corsproxy.io/?${encodeURIComponent(url)}`
+            ];
+
+            let finalErr;
+
+            for (let i = 0; i < targetUrls.length; i++) {
+                const target = targetUrls[i];
+                try {
+                    // console.log(`Attempting connection route ${i + 1}...`);
+                    const res = await fetch(target, safeOptions);
+                    // If it resolved to a real server (even a 4xx error), the network works.
+                    return res;
+                } catch (err) {
+                    // Only continue to the next proxy if the error is a hard network abort
+                    if (err.name === 'TypeError' || err.message.includes('fetch') || err.message.includes('NetworkError')) {
+                        finalErr = err;
+                        continue;
+                    }
+                    // Otherwise, throw legitimate application errors
+                    throw err;
                 }
-                throw err;
             }
+            throw finalErr || new Error("All network routes exhausted and blocked.");
         }
 
         // --- THEME TOGGLE LOGIC ---
@@ -1073,31 +1094,41 @@
         closeStatusBtn.addEventListener('click', hideStatus);
 
         // --- CONTACT FORM SUBMISSION ---
-        const contactForm = document.getElementById('contact-form');
         const submitBtn = document.getElementById('submit-btn');
 
-        contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        submitBtn.addEventListener('click', async (e) => {
+            // Manual validation because we removed the <form> tag
+            const nameEl = document.getElementById('form-name');
+            const emailEl = document.getElementById('form-email');
+            const messageEl = document.getElementById('form-message');
+
+            const name = nameEl.value.trim();
+            const email = emailEl.value.trim();
+            const message = messageEl.value.trim();
+
+            if (!name || !email || !message) {
+                showStatus("Error", "ALL PARAMETERS MUST BE FILLED.");
+                if (!name) nameEl.focus();
+                else if (!email) emailEl.focus();
+                else messageEl.focus();
+                return;
+            }
 
             if (supabaseUrl === 'YOUR_SUPABASE_URL') {
                 showStatus("Error", "Database configuration missing.");
                 return;
             }
 
-            const name = document.getElementById('form-name').value;
-            const email = document.getElementById('form-email').value;
-            const message = document.getElementById('form-message').value;
-
             const submitIcon = document.getElementById('submit-icon');
             const submitText = document.getElementById('submit-text');
 
             submitBtn.classList.add('pointer-events-none', 'opacity-75');
             submitIcon.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
-            submitText.innerText = `EXECUTING...`;
+            submitText.innerText = `ROUTING...`;
 
             try {
-                // Use ISP Bypass wrapper
-                const response = await ispBypassFetch(`${supabaseUrl}/rest/v1/messages`, {
+                // Use the multi-proxy cascade fetch wrapper
+                const response = await robustFetch(`${supabaseUrl}/rest/v1/messages`, {
                     method: 'POST',
                     headers: {
                         'apikey': supabaseAnonKey,
@@ -1115,11 +1146,15 @@
                 }
 
                 showStatus("Success", "Signal received. Awaiting comms.", "success");
-                contactForm.reset();
+                nameEl.value = '';
+                emailEl.value = '';
+                messageEl.value = '';
             } catch (err) {
                 let errMsg = err.message || JSON.stringify(err);
                 if (errMsg.includes('violates row-level security')) {
                     errMsg = "Security firewalls active. Write access denied.";
+                } else if (errMsg.includes('exhausted')) {
+                    errMsg = "ISP Hard Block. Try switching to Wi-Fi.";
                 }
                 showStatus("Error", errMsg);
             } finally {
@@ -1135,7 +1170,6 @@
         const adminCloseBtns = document.querySelectorAll('.admin-close-btn');
         const adminLoginView = document.getElementById('admin-login-view');
         const adminContentView = document.getElementById('admin-content-view');
-        const adminLoginForm = document.getElementById('admin-login-form');
         const adminLoginSubmit = document.getElementById('admin-login-submit');
         const adminRefreshBtn = document.getElementById('admin-refresh-btn');
         const adminLogoutBtn = document.getElementById('admin-logout-btn');
@@ -1181,10 +1215,14 @@
             }
         }
 
-        adminLoginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+        adminLoginSubmit.addEventListener('click', (e) => {
+            const passEl = document.getElementById('admin-password');
+            const pass = passEl.value;
 
-            const pass = document.getElementById('admin-password').value;
+            if (!pass) {
+                passEl.focus();
+                return;
+            }
 
             adminLoginSubmit.classList.add('pointer-events-none', 'opacity-75');
             adminLoginSubmit.innerText = "VERIFYING...";
@@ -1192,7 +1230,7 @@
             setTimeout(() => {
                 if (pass === ADMIN_PASS) {
                     isAdminAuth = true;
-                    adminLoginForm.reset();
+                    passEl.value = '';
                     updateAdminUI();
                 } else {
                     showStatus("Access Denied", "Incorrect passkey.", "error");
@@ -1237,7 +1275,6 @@
         });
 
         // --- PORTFOLIO SYSTEM LOGIC ---
-        const addProjectForm = document.getElementById('add-project-form');
         const addProjectSubmit = document.getElementById('add-project-submit');
         const adminProjectsList = document.getElementById('admin-projects-list');
         const archiveGrid = document.getElementById('archive-grid');
@@ -1251,8 +1288,8 @@
             if (supabaseUrl === 'YOUR_SUPABASE_URL') return;
 
             try {
-                // Use ISP Bypass wrapper
-                const res = await ispBypassFetch(`${supabaseUrl}/rest/v1/projects?order=created_at.desc`, {
+                // Use multi-proxy cascade
+                const res = await robustFetch(`${supabaseUrl}/rest/v1/projects?order=created_at.desc`, {
                     headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                 });
                 if (!res.ok) throw new Error("Fetch failed");
@@ -1266,8 +1303,15 @@
             }
         }
 
-        addProjectForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        addProjectSubmit.addEventListener('click', async (e) => {
+            const titleEl = document.getElementById('p-title');
+            const catEl = document.getElementById('p-category');
+            const yearEl = document.getElementById('p-year');
+
+            if (!titleEl.value.trim() || !catEl.value.trim() || !yearEl.value.trim() || !fileInput.files[0]) {
+                showStatus("Error", "ALL ASSET PARAMETERS MUST BE FILLED.");
+                return;
+            }
 
             const uploadIcon = document.getElementById('upload-icon');
             const uploadText = document.getElementById('upload-text');
@@ -1278,16 +1322,14 @@
 
             try {
                 const file = fileInput.files[0];
-                if (!file) throw new Error("Please select an image file.");
-
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
 
                 // CRITICAL FIX: iOS Safari sometimes returns an empty string for file.type
                 const fileType = file.type || 'application/octet-stream';
 
-                // Use ISP Bypass wrapper
-                const uploadRes = await ispBypassFetch(`${supabaseUrl}/storage/v1/object/${supabaseBucketName}/${fileName}`, {
+                // Use multi-proxy cascade
+                const uploadRes = await robustFetch(`${supabaseUrl}/storage/v1/object/${supabaseBucketName}/${fileName}`, {
                     method: 'POST',
                     headers: {
                         'apikey': supabaseAnonKey,
@@ -1308,14 +1350,14 @@
                 uploadText.innerText = `SAVING_DB...`;
 
                 const payload = {
-                    title: document.getElementById('p-title').value,
-                    category: document.getElementById('p-category').value,
+                    title: titleEl.value.trim(),
+                    category: catEl.value.trim(),
                     image_url: publicImageUrl,
-                    year: document.getElementById('p-year').value
+                    year: yearEl.value.trim()
                 };
 
-                // Use ISP Bypass wrapper
-                const dbRes = await ispBypassFetch(`${supabaseUrl}/rest/v1/projects`, {
+                // Use multi-proxy cascade
+                const dbRes = await robustFetch(`${supabaseUrl}/rest/v1/projects`, {
                     method: 'POST',
                     headers: {
                         'apikey': supabaseAnonKey,
@@ -1333,7 +1375,10 @@
                 }
 
                 showStatus("Success", "Asset compiled into database.", "success");
-                addProjectForm.reset();
+                titleEl.value = '';
+                catEl.value = '';
+                yearEl.value = '';
+                fileInput.value = '';
                 fetchProjects();
             } catch (err) {
                 showStatus("Upload Error", err.message || JSON.stringify(err));
@@ -1349,10 +1394,10 @@
             const btn = e.target.closest('.delete-proj-btn');
             if (btn) {
                 btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
-                btn.disabled = true;
+                btn.classList.add('pointer-events-none', 'opacity-75');
                 try {
-                    // Use ISP Bypass wrapper
-                    const res = await ispBypassFetch(`${supabaseUrl}/rest/v1/projects?id=eq.${btn.getAttribute('data-id')}`, {
+                    // Use multi-proxy cascade
+                    const res = await robustFetch(`${supabaseUrl}/rest/v1/projects?id=eq.${btn.getAttribute('data-id')}`, {
                         method: 'DELETE',
                         headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                     });
@@ -1363,7 +1408,7 @@
                 } catch (err) {
                     showStatus("Error", err.message);
                     btn.innerHTML = `<i class="ph-bold ph-trash"></i>`;
-                    btn.disabled = false;
+                    btn.classList.remove('pointer-events-none', 'opacity-75');
                 }
             }
         });
@@ -1441,8 +1486,8 @@
             `;
 
             try {
-                // Use ISP Bypass wrapper
-                const res = await ispBypassFetch(`${supabaseUrl}/rest/v1/messages?order=created_at.desc`, {
+                // Use multi-proxy cascade
+                const res = await robustFetch(`${supabaseUrl}/rest/v1/messages?order=created_at.desc`, {
                     headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                 });
                 if (!res.ok) throw new Error("Fetch failed");
@@ -1496,10 +1541,10 @@
             const btn = e.target.closest('.delete-msg-btn');
             if (btn) {
                 btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i>`;
-                btn.disabled = true;
+                btn.classList.add('pointer-events-none', 'opacity-75');
                 try {
-                    // Use ISP Bypass wrapper
-                    const res = await ispBypassFetch(`${supabaseUrl}/rest/v1/messages?id=eq.${btn.getAttribute('data-id')}`, {
+                    // Use multi-proxy cascade
+                    const res = await robustFetch(`${supabaseUrl}/rest/v1/messages?id=eq.${btn.getAttribute('data-id')}`, {
                         method: 'DELETE',
                         headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                     });
@@ -1509,7 +1554,7 @@
                 } catch (err) {
                     showStatus("Error", err.message);
                     btn.innerHTML = `<i class="ph-bold ph-trash text-lg"></i> Purge`;
-                    btn.disabled = false;
+                    btn.classList.remove('pointer-events-none', 'opacity-75');
                 }
             }
         });
