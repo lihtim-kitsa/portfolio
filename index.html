@@ -699,7 +699,7 @@
                                 ENTER PARAMETERS TO ESTABLISH CONNECTION.</p>
                         </div>
 
-                        <form id="contact-form" class="space-y-8 relative z-10">
+                        <form id="contact-form" action="javascript:void(0);" class="space-y-8 relative z-10">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div class="flex flex-col gap-2">
                                     <label
@@ -729,7 +729,7 @@
                             </div>
 
                             <div class="pt-4">
-                                <button type="button" id="submit-btn"
+                                <button type="submit" id="submit-btn"
                                     class="w-full bg-brutalRed text-white border-4 border-dark font-black text-2xl uppercase py-6 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all flex justify-center items-center gap-3">
                                     <span id="submit-icon" class="flex items-center"><i
                                             class="ph-bold ph-terminal"></i></span>
@@ -827,13 +827,13 @@
                     class="font-mono text-sm font-bold bg-brutalRed text-white inline-block px-2 mt-2 border border-dark">
                     AUTH_REQUIRED</p>
             </div>
-            <form id="admin-login-form" class="space-y-6">
+            <form id="admin-login-form" action="javascript:void(0);" class="space-y-6">
                 <div class="flex flex-col gap-2">
                     <input type="password" id="admin-password" required
                         class="bg-base border-4 border-dark p-4 text-dark text-center tracking-[0.5em] font-mono focus:outline-none focus:bg-brutalYellow transition-colors shadow-inner text-xl"
                         placeholder="••••••••">
                 </div>
-                <button type="button" id="admin-login-submit"
+                <button type="submit" id="admin-login-submit"
                     class="w-full bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all">
                     Unlock System
                 </button>
@@ -895,7 +895,8 @@
                                 class="ph-bold ph-plus text-white"></i></div>
                         Upload Asset
                     </h3>
-                    <form id="add-project-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <form id="add-project-form" action="javascript:void(0);"
+                        class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <input type="text" id="p-title" required
                             class="bg-base border-4 border-dark p-4 text-dark font-mono focus:bg-brutalYellow outline-none transition-colors"
                             placeholder="TITLE [E.G., ESPORTS]">
@@ -915,7 +916,7 @@
                             class="bg-base border-4 border-dark p-4 text-dark font-mono focus:bg-brutalYellow outline-none transition-colors md:col-span-2"
                             placeholder="YEAR [E.G., 2026]">
 
-                        <button type="button" id="add-project-submit"
+                        <button type="submit" id="add-project-submit"
                             class="bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all flex justify-center items-center gap-2 md:col-span-2">
                             <span id="upload-icon" class="flex items-center"><i
                                     class="ph-bold ph-upload-simple"></i></span>
@@ -1057,14 +1058,8 @@
         const contactForm = document.getElementById('contact-form');
         const submitBtn = document.getElementById('submit-btn');
 
-        submitBtn.addEventListener('click', async (e) => {
+        contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            // Native HTML5 Validation check
-            if (!contactForm.checkValidity()) {
-                contactForm.reportValidity();
-                return;
-            }
 
             if (supabaseUrl === 'YOUR_SUPABASE_URL') {
                 showStatus("Error", "Database configuration missing.");
@@ -1083,16 +1078,31 @@
             submitText.innerText = `EXECUTING...`;
 
             try {
-                const response = await fetch(`${supabaseUrl}/rest/v1/messages`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': supabaseAnonKey,
-                        'Authorization': `Bearer ${supabaseAnonKey}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify({ name, email, message })
-                });
+                // Retry logic added for flaky mobile network preflight requests
+                let response;
+                let fetchError;
+
+                for (let i = 0; i < 2; i++) {
+                    try {
+                        response = await fetch(`${supabaseUrl}/rest/v1/messages`, {
+                            method: 'POST',
+                            headers: {
+                                'apikey': supabaseAnonKey,
+                                'Authorization': `Bearer ${supabaseAnonKey}`,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=minimal'
+                            },
+                            body: JSON.stringify({ name, email, message })
+                        });
+                        fetchError = null;
+                        break; // Success, break out of retry loop
+                    } catch (err) {
+                        fetchError = err;
+                        await new Promise(r => setTimeout(r, 600)); // wait before retry
+                    }
+                }
+
+                if (fetchError) throw fetchError;
 
                 if (!response.ok) {
                     let errData = {};
@@ -1105,7 +1115,7 @@
             } catch (err) {
                 let errMsg = err.message || JSON.stringify(err);
                 if (errMsg === 'Failed to fetch' || errMsg.includes('NetworkError')) {
-                    errMsg = "Fetch aborted. " + errMsg;
+                    errMsg = "Network/ISP Blocked. Try Wi-Fi or check connection.";
                 } else if (errMsg.includes('violates row-level security')) {
                     errMsg = "Security firewalls active. Write access denied.";
                 }
@@ -1169,13 +1179,8 @@
             }
         }
 
-        adminLoginSubmit.addEventListener('click', (e) => {
+        adminLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-
-            if (!adminLoginForm.checkValidity()) {
-                adminLoginForm.reportValidity();
-                return;
-            }
 
             const pass = document.getElementById('admin-password').value;
 
@@ -1258,13 +1263,8 @@
             }
         }
 
-        addProjectSubmit.addEventListener('click', async (e) => {
+        addProjectForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            if (!addProjectForm.checkValidity()) {
-                addProjectForm.reportValidity();
-                return;
-            }
 
             const uploadIcon = document.getElementById('upload-icon');
             const uploadText = document.getElementById('upload-text');
@@ -1333,7 +1333,7 @@
             } catch (err) {
                 let uploadErrMsg = err.message || JSON.stringify(err);
                 if (uploadErrMsg === 'Failed to fetch' || uploadErrMsg.includes('NetworkError')) {
-                    uploadErrMsg = "Fetch aborted. " + uploadErrMsg;
+                    uploadErrMsg = "Network/ISP Blocked. Try Wi-Fi or check connection.";
                 }
                 showStatus("Upload Error", uploadErrMsg);
                 console.error(err);
