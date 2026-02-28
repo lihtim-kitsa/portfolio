@@ -935,6 +935,24 @@
 
     <!-- MAIN LOGIC (JS) -->
     <script>
+        // --- ISP BLOCK BYPASS UTILITY ---
+        // Automatically detects when telecom firewalls (Jio/Airtel) block the Supabase domain
+        // and instantly reroutes the data through a proxy without the user noticing.
+        async function ispBypassFetch(url, options) {
+            try {
+                // Attempt standard direct connection first
+                return await fetch(url, options);
+            } catch (err) {
+                // A TypeError on fetch means the network forcefully aborted the request (DNS/IP Block)
+                if (err.name === 'TypeError' || err.message === 'Failed to fetch' || err.message.includes('NetworkError')) {
+                    console.warn(`ISP Block Detected for ${url}. Engaging proxy bypass...`);
+                    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                    return await fetch(proxyUrl, options);
+                }
+                throw err;
+            }
+        }
+
         // --- THEME TOGGLE LOGIC ---
         const themeToggleBtn = document.getElementById('theme-toggle');
         const themeIcon = document.getElementById('theme-icon');
@@ -1078,31 +1096,17 @@
             submitText.innerText = `EXECUTING...`;
 
             try {
-                // Retry logic added for flaky mobile network preflight requests
-                let response;
-                let fetchError;
-
-                for (let i = 0; i < 2; i++) {
-                    try {
-                        response = await fetch(`${supabaseUrl}/rest/v1/messages`, {
-                            method: 'POST',
-                            headers: {
-                                'apikey': supabaseAnonKey,
-                                'Authorization': `Bearer ${supabaseAnonKey}`,
-                                'Content-Type': 'application/json',
-                                'Prefer': 'return=minimal'
-                            },
-                            body: JSON.stringify({ name, email, message })
-                        });
-                        fetchError = null;
-                        break; // Success, break out of retry loop
-                    } catch (err) {
-                        fetchError = err;
-                        await new Promise(r => setTimeout(r, 600)); // wait before retry
-                    }
-                }
-
-                if (fetchError) throw fetchError;
+                // Use ISP Bypass wrapper
+                const response = await ispBypassFetch(`${supabaseUrl}/rest/v1/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabaseAnonKey,
+                        'Authorization': `Bearer ${supabaseAnonKey}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ name, email, message })
+                });
 
                 if (!response.ok) {
                     let errData = {};
@@ -1114,9 +1118,7 @@
                 contactForm.reset();
             } catch (err) {
                 let errMsg = err.message || JSON.stringify(err);
-                if (errMsg === 'Failed to fetch' || errMsg.includes('NetworkError')) {
-                    errMsg = "Network/ISP Blocked. Try Wi-Fi or check connection.";
-                } else if (errMsg.includes('violates row-level security')) {
+                if (errMsg.includes('violates row-level security')) {
                     errMsg = "Security firewalls active. Write access denied.";
                 }
                 showStatus("Error", errMsg);
@@ -1249,7 +1251,8 @@
             if (supabaseUrl === 'YOUR_SUPABASE_URL') return;
 
             try {
-                const res = await fetch(`${supabaseUrl}/rest/v1/projects?order=created_at.desc`, {
+                // Use ISP Bypass wrapper
+                const res = await ispBypassFetch(`${supabaseUrl}/rest/v1/projects?order=created_at.desc`, {
                     headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                 });
                 if (!res.ok) throw new Error("Fetch failed");
@@ -1283,7 +1286,8 @@
                 // CRITICAL FIX: iOS Safari sometimes returns an empty string for file.type
                 const fileType = file.type || 'application/octet-stream';
 
-                const uploadRes = await fetch(`${supabaseUrl}/storage/v1/object/${supabaseBucketName}/${fileName}`, {
+                // Use ISP Bypass wrapper
+                const uploadRes = await ispBypassFetch(`${supabaseUrl}/storage/v1/object/${supabaseBucketName}/${fileName}`, {
                     method: 'POST',
                     headers: {
                         'apikey': supabaseAnonKey,
@@ -1310,7 +1314,8 @@
                     year: document.getElementById('p-year').value
                 };
 
-                const dbRes = await fetch(`${supabaseUrl}/rest/v1/projects`, {
+                // Use ISP Bypass wrapper
+                const dbRes = await ispBypassFetch(`${supabaseUrl}/rest/v1/projects`, {
                     method: 'POST',
                     headers: {
                         'apikey': supabaseAnonKey,
@@ -1331,11 +1336,7 @@
                 addProjectForm.reset();
                 fetchProjects();
             } catch (err) {
-                let uploadErrMsg = err.message || JSON.stringify(err);
-                if (uploadErrMsg === 'Failed to fetch' || uploadErrMsg.includes('NetworkError')) {
-                    uploadErrMsg = "Network/ISP Blocked. Try Wi-Fi or check connection.";
-                }
-                showStatus("Upload Error", uploadErrMsg);
+                showStatus("Upload Error", err.message || JSON.stringify(err));
                 console.error(err);
             } finally {
                 addProjectSubmit.classList.remove('pointer-events-none', 'opacity-75');
@@ -1350,7 +1351,8 @@
                 btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
                 btn.disabled = true;
                 try {
-                    const res = await fetch(`${supabaseUrl}/rest/v1/projects?id=eq.${btn.getAttribute('data-id')}`, {
+                    // Use ISP Bypass wrapper
+                    const res = await ispBypassFetch(`${supabaseUrl}/rest/v1/projects?id=eq.${btn.getAttribute('data-id')}`, {
                         method: 'DELETE',
                         headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                     });
@@ -1439,7 +1441,8 @@
             `;
 
             try {
-                const res = await fetch(`${supabaseUrl}/rest/v1/messages?order=created_at.desc`, {
+                // Use ISP Bypass wrapper
+                const res = await ispBypassFetch(`${supabaseUrl}/rest/v1/messages?order=created_at.desc`, {
                     headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                 });
                 if (!res.ok) throw new Error("Fetch failed");
@@ -1495,7 +1498,8 @@
                 btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i>`;
                 btn.disabled = true;
                 try {
-                    const res = await fetch(`${supabaseUrl}/rest/v1/messages?id=eq.${btn.getAttribute('data-id')}`, {
+                    // Use ISP Bypass wrapper
+                    const res = await ispBypassFetch(`${supabaseUrl}/rest/v1/messages?id=eq.${btn.getAttribute('data-id')}`, {
                         method: 'DELETE',
                         headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
                     });
