@@ -353,7 +353,7 @@
             </header>
 
             <!-- Scrollable Views Container -->
-            <div class="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-10 pb-10 relative z-10">
+            <div class="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-10 pb-32 relative z-10">
 
                 <!-- ================= VIEW: OVERVIEW ================= -->
                 <div id="view-overview" class="view-section active flex-col gap-8 md:gap-12">
@@ -730,8 +730,10 @@
 
                             <div class="pt-4">
                                 <button type="submit" id="submit-btn"
-                                    class="w-full bg-brutalRed text-white border-4 border-dark font-black text-2xl uppercase py-6 shadow-brutal hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-active transition-all flex justify-center items-center gap-3">
-                                    <i class="ph-bold ph-terminal"></i> Execute Submission
+                                    class="w-full bg-brutalRed text-white border-4 border-dark font-black text-2xl uppercase py-6 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all flex justify-center items-center gap-3">
+                                    <span id="submit-icon" class="flex items-center"><i
+                                            class="ph-bold ph-terminal"></i></span>
+                                    <span id="submit-text">Execute Submission</span>
                                 </button>
                             </div>
                         </form>
@@ -832,7 +834,7 @@
                         placeholder="••••••••">
                 </div>
                 <button type="submit" id="admin-login-submit"
-                    class="w-full bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-active transition-all">
+                    class="w-full bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all">
                     Unlock System
                 </button>
             </form>
@@ -914,8 +916,10 @@
                             placeholder="YEAR [E.G., 2026]">
 
                         <button type="submit" id="add-project-submit"
-                            class="bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-active transition-all flex justify-center items-center gap-2 md:col-span-2">
-                            <i class="ph-bold ph-upload-simple"></i> Execute Upload
+                            class="bg-dark text-white border-4 border-dark font-black uppercase text-xl py-4 shadow-brutal hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-brutal-active transition-all flex justify-center items-center gap-2 md:col-span-2">
+                            <span id="upload-icon" class="flex items-center"><i
+                                    class="ph-bold ph-upload-simple"></i></span>
+                            <span id="upload-text">Execute Upload</span>
                         </button>
                     </form>
                 </div>
@@ -1065,12 +1069,17 @@
             const email = document.getElementById('form-email').value;
             const message = document.getElementById('form-message').value;
 
+            const submitIcon = document.getElementById('submit-icon');
+            const submitText = document.getElementById('submit-text');
+
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> EXECUTING...`;
+            submitIcon.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
+            submitText.innerText = `EXECUTING...`;
 
             try {
                 const response = await fetch(`${supabaseUrl}/rest/v1/messages`, {
                     method: 'POST',
+                    mode: 'cors',
                     headers: {
                         'apikey': supabaseAnonKey,
                         'Authorization': `Bearer ${supabaseAnonKey}`,
@@ -1080,20 +1089,26 @@
                     body: JSON.stringify({ name, email, message })
                 });
 
-                if (!response.ok) throw new Error((await response.json()).message || "Transmission failed");
+                if (!response.ok) {
+                    let errData = {};
+                    try { errData = await response.json(); } catch (ex) { }
+                    throw new Error(errData.message || `HTTP ${response.status}: Transmission failed`);
+                }
 
                 showStatus("Success", "Signal received. Awaiting comms.", "success");
                 contactForm.reset();
             } catch (err) {
-                const errMsg = err.message || JSON.stringify(err);
-                if (errMsg.includes('violates row-level security')) {
-                    showStatus("Database Error", "Security firewalls active. Write access denied.");
-                } else {
-                    showStatus("Error", errMsg);
+                let errMsg = err.message || JSON.stringify(err);
+                if (errMsg === 'Failed to fetch' || errMsg.includes('NetworkError')) {
+                    errMsg = "Network Blocked. Check mobile connection or adblocker.";
+                } else if (errMsg.includes('violates row-level security')) {
+                    errMsg = "Security firewalls active. Write access denied.";
                 }
+                showStatus("Error", errMsg);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="ph-bold ph-terminal"></i> Execute Submission`;
+                submitIcon.innerHTML = `<i class="ph-bold ph-terminal"></i>`;
+                submitText.innerText = `Execute Submission`;
             }
         });
 
@@ -1234,8 +1249,13 @@
 
         addProjectForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const uploadIcon = document.getElementById('upload-icon');
+            const uploadText = document.getElementById('upload-text');
+
             addProjectSubmit.disabled = true;
-            addProjectSubmit.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> UPLOADING...`;
+            uploadIcon.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
+            uploadText.innerText = `UPLOADING...`;
 
             try {
                 const file = fileInput.files[0];
@@ -1244,23 +1264,29 @@
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
 
+                // CRITICAL FIX: iOS Safari sometimes returns an empty string for file.type
+                const fileType = file.type || 'application/octet-stream';
+
                 const uploadRes = await fetch(`${supabaseUrl}/storage/v1/object/${supabaseBucketName}/${fileName}`, {
                     method: 'POST',
+                    mode: 'cors',
                     headers: {
                         'apikey': supabaseAnonKey,
                         'Authorization': `Bearer ${supabaseAnonKey}`,
-                        'Content-Type': file.type
+                        'Content-Type': fileType
                     },
                     body: file
                 });
 
                 if (!uploadRes.ok) {
-                    const errData = await uploadRes.json();
-                    throw new Error(`Storage Error: ${errData.message}`);
+                    let errData = {};
+                    try { errData = await uploadRes.json(); } catch (ex) { }
+                    throw new Error(`Storage Error: ${errData.message || 'Server rejected file'}`);
                 }
 
                 const publicImageUrl = `${supabaseUrl}/storage/v1/object/public/${supabaseBucketName}/${fileName}`;
-                addProjectSubmit.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> SAVING_DB...`;
+                uploadIcon.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i>`;
+                uploadText.innerText = `SAVING_DB...`;
 
                 const payload = {
                     title: document.getElementById('p-title').value,
@@ -1271,6 +1297,7 @@
 
                 const dbRes = await fetch(`${supabaseUrl}/rest/v1/projects`, {
                     method: 'POST',
+                    mode: 'cors',
                     headers: {
                         'apikey': supabaseAnonKey,
                         'Authorization': `Bearer ${supabaseAnonKey}`,
@@ -1280,17 +1307,26 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!dbRes.ok) throw new Error("Database save failed.");
+                if (!dbRes.ok) {
+                    let dbErr = {};
+                    try { dbErr = await dbRes.json(); } catch (ex) { }
+                    throw new Error(`Database Error: ${dbErr.message || 'Failed to link asset'}`);
+                }
 
                 showStatus("Success", "Asset compiled into database.", "success");
                 addProjectForm.reset();
                 fetchProjects();
             } catch (err) {
-                showStatus("Upload Error", err.message);
+                let uploadErrMsg = err.message || JSON.stringify(err);
+                if (uploadErrMsg === 'Failed to fetch' || uploadErrMsg.includes('NetworkError')) {
+                    uploadErrMsg = "Network Blocked. Check mobile connection or adblocker.";
+                }
+                showStatus("Upload Error", uploadErrMsg);
                 console.error(err);
             } finally {
                 addProjectSubmit.disabled = false;
-                addProjectSubmit.innerHTML = `<i class="ph-bold ph-upload-simple"></i> Execute Upload`;
+                uploadIcon.innerHTML = `<i class="ph-bold ph-upload-simple"></i>`;
+                uploadText.innerText = `Execute Upload`;
             }
         });
 
@@ -1328,7 +1364,7 @@
                         <h4 class="font-black text-sm uppercase truncate">${p.title}</h4>
                         <p class="text-xs font-mono font-bold mt-1 bg-brutalYellow border-2 border-dark px-1 inline-block">${p.category} | ${p.year}</p>
                     </div>
-                    <button data-id="${p.id}" class="delete-proj-btn w-12 h-12 border-4 border-dark bg-brutalRed text-white hover:bg-dark hover:-translate-y-1 hover:translate-x-1 shadow-[2px_2px_0_0_var(--color-dark)] flex items-center justify-center shrink-0 transition-all">
+                    <button data-id="${p.id}" class="delete-proj-btn w-12 h-12 border-4 border-dark bg-brutalRed text-white hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] shadow-[4px_4px_0_0_var(--color-dark)] active:shadow-none flex items-center justify-center shrink-0 transition-all">
                         <i class="ph-bold ph-trash text-xl"></i>
                     </button>
                 </div>
@@ -1427,7 +1463,7 @@
                             <span class="text-xs font-mono font-bold bg-dark text-white px-3 py-1 border-2 border-dark shadow-brutal-sm uppercase whitespace-nowrap">
                                 <i class="ph-bold ph-clock mr-1"></i> ${new Date(msg.created_at || Date.now()).toLocaleString()}
                             </span>
-                            <button data-id="${msg.id}" class="delete-msg-btn text-sm font-black uppercase border-4 border-dark bg-base text-dark hover:bg-brutalRed hover:text-white px-4 py-2 shadow-[2px_2px_0_0_var(--color-dark)] transition-all flex items-center gap-2 active:shadow-none active:translate-x-[2px] active:translate-y-[2px]">
+                            <button data-id="${msg.id}" class="delete-msg-btn text-sm font-black uppercase border-4 border-dark bg-base text-dark hover:bg-brutalRed hover:text-white px-4 py-2 shadow-[4px_4px_0_0_var(--color-dark)] hover:brightness-110 active:translate-y-[4px] active:translate-x-[4px] active:shadow-none transition-all flex items-center gap-2">
                                 <i class="ph-bold ph-trash text-lg"></i> Purge
                             </button>
                         </div>
