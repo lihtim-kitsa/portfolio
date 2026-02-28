@@ -873,7 +873,7 @@
                         <i class="ph-bold ph-arrows-clockwise"></i> <span class="hidden sm:inline">Sync</span>
                     </button>
                     <button id="admin-logout-btn"
-                        class="px-4 py-2 bg-brutalRed text-white border-4 border-dark font-black uppercase text-sm shadow-[2px_2px_0_0_var(--color-dark)] hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-sm active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center gap-2">
+                        class="px-4 py-2 bg-brutalRed text-white border-4 border-dark font-black uppercase text-sm shadow-[2px_2px_0_var(--color-dark)] hover:-translate-y-1 hover:translate-x-1 hover:shadow-brutal-sm active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all flex items-center gap-2">
                         <i class="ph-bold ph-sign-out"></i> <span class="hidden sm:inline">Logout</span>
                     </button>
                     <button
@@ -937,19 +937,16 @@
 
     <!-- MAIN LOGIC (JS) -->
     <script>
-        // --- BULLETPROOF MULTI-PROXY ISP BYPASS ---
-        // Handles direct connection, then cascades through known stable proxies if Jio/Airtel intercepts.
+        // --- INDIAN TELECOM FIREWALL DIAGNOSTIC BYPASS ---
+        // Exclusively configured to bypass blocks where Jio/Airtel drop `.supabase.co`
         async function robustFetch(url, options) {
-            // Remove 'mode' if it exists so proxies can natively handle CORS negotiations
             const safeOptions = { ...options };
-            delete safeOptions.mode;
+            delete safeOptions.mode; // allow native proxy CORS handling
 
-            // Waterfall of endpoints: Direct -> Proxy 1 -> Proxy 2 -> Proxy 3
+            // Only try Direct first, then ONE highly reliable fallback that accepts POST headers
             const targetUrls = [
-                url,
-                `https://thingproxy.freeboard.io/fetch/${url}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-                `https://corsproxy.io/?${encodeURIComponent(url)}`
+                url, // 1. Direct connection
+                `https://corsproxy.io/?${url}`, // 2. Proxy bypass
             ];
 
             let finalErr;
@@ -957,21 +954,20 @@
             for (let i = 0; i < targetUrls.length; i++) {
                 const target = targetUrls[i];
                 try {
-                    // console.log(`Attempting connection route ${i + 1}...`);
                     const res = await fetch(target, safeOptions);
-                    // If it resolved to a real server (even a 4xx error), the network works.
                     return res;
                 } catch (err) {
-                    // Only continue to the next proxy if the error is a hard network abort
+                    // Catch network aborts (usually indicative of an ISP firewall intercept)
                     if (err.name === 'TypeError' || err.message.includes('fetch') || err.message.includes('NetworkError')) {
                         finalErr = err;
                         continue;
                     }
-                    // Otherwise, throw legitimate application errors
+                    // Throw legit app errors
                     throw err;
                 }
             }
-            throw finalErr || new Error("All network routes exhausted and blocked.");
+            // If we exhaust the array, trigger specific diagnostic flag
+            throw new Error("TELECOM_FIREWALL_ACTIVE");
         }
 
         // --- THEME TOGGLE LOGIC ---
@@ -1080,7 +1076,7 @@
             statusOverlay.classList.add('opacity-100', 'translate-x-0');
 
             clearTimeout(statusTimeout);
-            statusTimeout = setTimeout(hideStatus, 5000);
+            statusTimeout = setTimeout(hideStatus, 7000); // Kept longer to read diagnostic text
         }
 
         function hideStatus() {
@@ -1131,8 +1127,9 @@
                 const response = await robustFetch(`${supabaseUrl}/rest/v1/messages`, {
                     method: 'POST',
                     headers: {
+                        // Stripping 'Authorization' bearer token and relying strictly on apikey 
+                        // sometimes helps free CORS proxies pass the POST request through.
                         'apikey': supabaseAnonKey,
-                        'Authorization': `Bearer ${supabaseAnonKey}`,
                         'Content-Type': 'application/json',
                         'Prefer': 'return=minimal'
                     },
@@ -1151,12 +1148,13 @@
                 messageEl.value = '';
             } catch (err) {
                 let errMsg = err.message || JSON.stringify(err);
-                if (errMsg.includes('violates row-level security')) {
-                    errMsg = "Security firewalls active. Write access denied.";
-                } else if (errMsg.includes('exhausted')) {
-                    errMsg = "ISP Hard Block. Try switching to Wi-Fi.";
+                if (errMsg === 'TELECOM_FIREWALL_ACTIVE') {
+                    showStatus("Network Blocked", "TELECOM FIREWALL DETECTED: Your mobile network (Jio/Airtel) is blocking the database. Connect to Wi-Fi or VPN.");
+                } else if (errMsg.includes('violates row-level security')) {
+                    showStatus("Error", "Security firewalls active. Write access denied.");
+                } else {
+                    showStatus("Error", errMsg);
                 }
-                showStatus("Error", errMsg);
             } finally {
                 submitBtn.classList.remove('pointer-events-none', 'opacity-75');
                 submitIcon.innerHTML = `<i class="ph-bold ph-terminal"></i>`;
@@ -1290,7 +1288,7 @@
             try {
                 // Use multi-proxy cascade
                 const res = await robustFetch(`${supabaseUrl}/rest/v1/projects?order=created_at.desc`, {
-                    headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
+                    headers: { 'apikey': supabaseAnonKey }
                 });
                 if (!res.ok) throw new Error("Fetch failed");
                 const projects = await res.json();
@@ -1299,7 +1297,7 @@
                 renderAdminProjects(projects);
             } catch (err) {
                 console.error("Error fetching projects:", err);
-                archiveGrid.innerHTML = `<div class="col-span-full p-8 text-center text-white font-black uppercase bg-brutalRed border-4 border-dark shadow-brutal">Failed to load archive. Check database.</div>`;
+                archiveGrid.innerHTML = `<div class="col-span-full p-8 text-center text-white font-black uppercase bg-brutalRed border-4 border-dark shadow-brutal">Failed to load archive. Connect to Wi-Fi if using mobile data.</div>`;
             }
         }
 
@@ -1361,7 +1359,6 @@
                     method: 'POST',
                     headers: {
                         'apikey': supabaseAnonKey,
-                        'Authorization': `Bearer ${supabaseAnonKey}`,
                         'Content-Type': 'application/json',
                         'Prefer': 'return=minimal'
                     },
@@ -1381,7 +1378,12 @@
                 fileInput.value = '';
                 fetchProjects();
             } catch (err) {
-                showStatus("Upload Error", err.message || JSON.stringify(err));
+                let errMsg = err.message || JSON.stringify(err);
+                if (errMsg === 'TELECOM_FIREWALL_ACTIVE') {
+                    showStatus("Network Blocked", "TELECOM FIREWALL DETECTED: Switch to Wi-Fi to upload files.");
+                } else {
+                    showStatus("Upload Error", errMsg);
+                }
                 console.error(err);
             } finally {
                 addProjectSubmit.classList.remove('pointer-events-none', 'opacity-75');
@@ -1406,7 +1408,12 @@
                     fetchProjects();
                     showStatus("Success", "Asset purged from index.", "success");
                 } catch (err) {
-                    showStatus("Error", err.message);
+                    let errMsg = err.message || JSON.stringify(err);
+                    if (errMsg === 'TELECOM_FIREWALL_ACTIVE') {
+                        showStatus("Error", "Connect to Wi-Fi to delete files.");
+                    } else {
+                        showStatus("Error", errMsg);
+                    }
                     btn.innerHTML = `<i class="ph-bold ph-trash"></i>`;
                     btn.classList.remove('pointer-events-none', 'opacity-75');
                 }
@@ -1488,12 +1495,14 @@
             try {
                 // Use multi-proxy cascade
                 const res = await robustFetch(`${supabaseUrl}/rest/v1/messages?order=created_at.desc`, {
-                    headers: { 'apikey': supabaseAnonKey, 'Authorization': `Bearer ${supabaseAnonKey}` }
+                    headers: { 'apikey': supabaseAnonKey }
                 });
                 if (!res.ok) throw new Error("Fetch failed");
                 renderMessages(await res.json());
             } catch (err) {
-                messagesContainer.innerHTML = `<div class="p-6 text-center text-white font-black uppercase bg-brutalRed border-4 border-dark shadow-brutal">ERR: ${err.message}</div>`;
+                let errMsg = err.message || JSON.stringify(err);
+                if (errMsg === 'TELECOM_FIREWALL_ACTIVE') errMsg = 'Mobile ISP block active. Please connect to Wi-Fi.';
+                messagesContainer.innerHTML = `<div class="p-6 text-center text-white font-black uppercase bg-brutalRed border-4 border-dark shadow-brutal">ERR: ${errMsg}</div>`;
             }
         }
 
@@ -1552,7 +1561,12 @@
                     fetchMessages();
                     showStatus("Success", "Record purged.", "success");
                 } catch (err) {
-                    showStatus("Error", err.message);
+                    let errMsg = err.message || JSON.stringify(err);
+                    if (errMsg === 'TELECOM_FIREWALL_ACTIVE') {
+                        showStatus("Error", "Connect to Wi-Fi to delete records.");
+                    } else {
+                        showStatus("Error", errMsg);
+                    }
                     btn.innerHTML = `<i class="ph-bold ph-trash text-lg"></i> Purge`;
                     btn.classList.remove('pointer-events-none', 'opacity-75');
                 }
